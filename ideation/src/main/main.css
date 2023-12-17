@@ -1,0 +1,37 @@
+.main-board {
+  display: flex;
+  justify-content: space-around; /* Adjust as needed */
+  align-items: center; /* Adjust as needed */
+}
+
+/* Style for ImageUploader */
+.image-uploader {
+  background-color: #ffd700; /* Set your desired background color */
+  padding: 20px; /* Adjust as needed */
+}
+
+/* Style for ImageProcessor */
+.image-processor {
+  background-color: #00ff00; /* Set your desired background color */
+  padding: 20px; /* Adjust as needed */
+}
+
+body,
+html {
+  height: 100%;
+  margin: 0;
+}
+
+.main-board {
+  display: flex;
+  height: 100vh; /* Set height to 100% of the viewport height */
+}
+
+/* Add styles for ImageUploader and ImageProcessor if needed */
+.image-uploader {
+  flex: 1; /* Take up 50% of the width */
+}
+
+.image-processor {
+  flex: 1; /* Take up 50% of the width */
+}
