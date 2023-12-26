@@ -1,11 +1,11 @@
 .image-uploader-container {
-  flex: 1;
-  background-color: #f0f0f0;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  margin: 10px;
+  padding-bottom: 20px;
+  width: 50%;
+  margin: auto;
+  display: flex; /* Set to flex to use flexbox properties */
+  flex-direction: column; /* Stack children elements in a column */
+  align-items: center; /* Center children elements horizontally */
+  justify-content: center; /* Center children elements vertically if there's space */
 }
 
 .image-uploader-title {
@@ -18,13 +18,108 @@
 }
 
 .image-preview-container {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto; /* Enables vertical scrolling */
+  max-height: 600px; /* Adjust the max height as needed */
+  gap: 10px;
+
+  padding-right: 4px;
 }
 
 .image-preview {
-  max-width: 100%;
-  max-height: 200px;
+  width: 200px; /* Fixed width */
+  height: 200px; /* Fixed height */
+  object-fit: cover; /* Ensures the image covers the area without stretching */
   border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 10px; /* Keep the margin from the original style if needed */
+
+  max-width: 100%;
+}
+
+.image-uploader-button {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
   margin-top: 10px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+
+  align-self: center;
+}
+
+.image-uploader-button:hover {
+  background-color: #2980b9;
+}
+
+.remove-image-button {
+  margin-top: 5px;
+  padding: 5px 15px;
+  font-size: 0.8rem;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  width: 100%;
+}
+
+.remove-image-button:hover {
+  background-color: #c0392b;
+}
+
+.image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  border: 3px solid #333; /* Solid border, 3px wide, dark color */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  padding: 10px; /* Space between the border and the content */
+  background: white; /* Background color */
+}
+
+.image-uploader-input {
+  display: none;
+}
+
+.image-preview-container::-webkit-scrollbar {
+  width: 8px; /* Adjust the width as needed */
+  background: transparent; /* Make scrollbar background transparent */
+}
+
+.image-preview-container::-webkit-scrollbar-thumb {
+  background: transparent; /* Make scrollbar thumb transparent */
+}
+
+.image-preview-container:hover::-webkit-scrollbar-thumb,
+.image-preview-container:active::-webkit-scrollbar-thumb {
+  background: #888; /* Set to desired scrollbar thumb color */
+}
+
+.image-preview-container {
+  scrollbar-width: thin; /* 'auto' or 'thin' */
+  scrollbar-color: transparent transparent; /* Set thumb and track to transparent */
+}
+
+.image-preview-container:hover,
+.image-preview-container:active {
+  scrollbar-color: #888 transparent; /* Set to desired scrollbar thumb color */
+}
+
+@media (max-width: 768px) {
+  .image-preview {
+    width: 150px; /* Smaller size on small screens */
+    height: 150px; /* Smaller size on small screens */
+  }
 }
