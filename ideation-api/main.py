@@ -25,4 +25,4 @@ async def say_hello(name: str):
 async def create_upload_file(file: UploadFile = File(...)):
     with open(file.filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    return FileResponse(file.filename)
+    return FileResponse('./data/dog.jpeg')
