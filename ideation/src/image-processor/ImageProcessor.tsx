@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./image-processor.css"; // Ensure this CSS file exists and contains the necessary styles
+import "./image-processor.css";
 
 const ImageProcessor: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -14,10 +14,28 @@ const ImageProcessor: React.FC = () => {
     }
   };
 
-  // Placeholder function for processing the image
   const processImage = () => {
-    console.log("Processing image...");
-    // Implement image processing logic here
+    const imageInput = document.getElementById(
+      "image-processor-input"
+    ) as HTMLInputElement;
+
+    if (imageInput && imageInput.files && imageInput.files.length > 0) {
+      const file = imageInput.files[0];
+      console.log("Processing image:", file.name);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      fetch("http://localhost:8000/uploadfile", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+        .catch((error) => console.error("Error:", error));
+    } else {
+      console.log("No file selected.");
+    }
   };
 
   const handleOnClickDelete = () => {
