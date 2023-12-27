@@ -30,8 +30,19 @@ const ImageProcessor: React.FC = () => {
         method: "POST",
         body: formData,
       })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
+        .then((response) => {
+          if (
+            response.ok &&
+            response.headers.get("Content-Type")?.includes("image")
+          ) {
+            return response.blob();
+          }
+          throw new Error("The response is not an image file.");
+        })
+        .then((blob) => {
+          const imageUrl = URL.createObjectURL(blob);
+          setUploadedImage(imageUrl);
+        })
         .catch((error) => console.error("Error:", error));
     } else {
       console.log("No file selected.");
