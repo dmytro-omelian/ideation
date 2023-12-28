@@ -11,9 +11,9 @@ from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamP
 # Model Initialization
 def initialize_model():
     HOME = os.getcwd()
-    CHECKPOINT_PATH = os.path.join(HOME, "weights", "sam_vit_h_4b8939.pth")
+    CHECKPOINT_PATH = os.path.join(HOME, "weights", "sam_vit_b_01ec64.pth")
     DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    MODEL_TYPE = "vit_h"
+    MODEL_TYPE = "vit_b"
 
     sam = sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH).to(device=DEVICE)
     mask_generator = SamAutomaticMaskGenerator(sam)

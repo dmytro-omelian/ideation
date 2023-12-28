@@ -1,3 +1,5 @@
 /venv
 /weights
 /__pycache__
+FastSAM.pt
+/FastSAM
