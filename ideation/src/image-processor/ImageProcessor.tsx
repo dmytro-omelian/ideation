@@ -10,8 +10,16 @@ export enum Mode {
   Box = "box",
 }
 
+interface uploadedImage {
+  imageUrl: string;
+  width: string;
+  height: string;
+}
+
 interface IState {
   uploadedImage: string | null;
+  uploadedImageHeight?: number;
+  uploadedImageWidth?: number;
   mode: Mode;
   points: Point[];
   boxStart: Point | null;
@@ -107,7 +115,22 @@ class ImageProcessor extends React.Component<{}, IState> {
     if (event.target.files && event.target.files[0]) {
       const fileReader = new FileReader();
       fileReader.onload = (e: ProgressEvent<FileReader>) => {
-        this.setState({ uploadedImage: e.target?.result as string });
+        const imageUrl = e.target?.result as string;
+
+        // Create an image object
+        const img = new Image();
+        img.onload = () => {
+          // Now img.width and img.height hold the image's dimensions
+          console.log("Image width:", img.width, "Image height:", img.height);
+
+          this.setState({
+            uploadedImageWidth: img.width,
+            uploadedImageHeight: img.height,
+          });
+        };
+        img.src = imageUrl;
+
+        this.setState({ uploadedImage: imageUrl });
       };
       fileReader.readAsDataURL(event.target.files[0]);
     }
@@ -194,7 +217,8 @@ class ImageProcessor extends React.Component<{}, IState> {
   };
 
   processImage = () => {
-    const { mode, points, box } = this.state;
+    const { mode, points, box, uploadedImageWidth, uploadedImageHeight } =
+      this.state;
     console.log(box);
 
     const imageInput = document.getElementById(
@@ -214,6 +238,10 @@ class ImageProcessor extends React.Component<{}, IState> {
         formData.append("points", JSON.stringify(points));
       }
 
+      if (uploadedImageHeight && uploadedImageWidth) {
+        formData.append("img_width", uploadedImageWidth as unknown as string);
+        formData.append("img_height", uploadedImageHeight as unknown as string);
+      }
       formData.append("file", file);
 
       fetch(url, {
