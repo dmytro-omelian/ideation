@@ -58,5 +58,6 @@ async def create_upload_file(file: UploadFile = File(...)):
     with open(file.filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    segmented_image_path = process_image_with_model(file.filename, mask_generator)
-    return FileResponse(segmented_image_path)
+    # segmented_image_path = process_image_with_model(file.filename, mask_generator)
+    # return FileResponse(segmented_image_path)
+    return FileResponse(file.filename)
