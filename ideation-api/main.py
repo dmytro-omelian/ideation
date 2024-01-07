@@ -1,4 +1,7 @@
-from fastapi import FastAPI, File, UploadFile
+import json
+from typing import List
+
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
@@ -7,6 +10,16 @@ import torch
 import cv2
 import supervision as sv
 from mobile_sam import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+from pydantic import BaseModel
+
+class Box(BaseModel):
+    x: float
+    y: float
+    width: float
+    height: float
+    label: str
+
+
 # def initialize_model():
 #     HOME = os.getcwd()
 #     check_point_file = "mobile_sam.pt"
@@ -20,7 +33,7 @@ from mobile_sam import sam_model_registry, SamAutomaticMaskGenerator, SamPredict
 #     return mask_generator
 
 # Service for Model Processing
-def process_image_with_model(image_path, default_box):
+def process_image_with_model(image_path, default_box: Box):
     HOME = os.getcwd()
     check_point_file = "mobile_sam.pt"
     CHECKPOINT_PATH = os.path.join(HOME, "weights", f"{check_point_file}")
@@ -36,8 +49,15 @@ def process_image_with_model(image_path, default_box):
     predictor = SamPredictor(mobile_sam)
     predictor.set_image(image_rgb)
     print('Predicting')
+    # TODO load file with default box drawn to check if we get the correct box from the file
+    box_dto = np.array([
+        default_box['x'],
+        default_box['y'],
+        default_box['x'] + default_box['width'],
+        default_box['y'] + default_box['height']
+    ])
     masks, _, _ = predictor.predict(
-        box=default_box,
+        box=box_dto,
         multimask_output=False
     )
     print('Masks Generated')
@@ -96,3 +116,36 @@ async def create_upload_file(file: UploadFile = File(...)):
 
     segmented_image_path = process_image_with_model(file.filename, box)
     return FileResponse(segmented_image_path)
+
+@app.post("/uploadfile/box")
+async def create_upload_file(file: UploadFile = File(...), box: str = Form(...)):
+    print('File Received. Starting Processing')
+    try:
+        box: Box = json.loads(box)
+        print('Box Received: ', box)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for points")
+
+    with open(file.filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    segmented_image_path = process_image_with_model(file.filename, box)
+    return FileResponse(segmented_image_path)
+
+class Point(BaseModel):
+    x: float
+    y: float
+
+@app.post("/uploadfile/points")
+async def create_upload_file(file: UploadFile = File(...), points: str = Form(...)):
+    print('File Received. Starting Processing')
+    try:
+        points_list: List[Point] = json.loads(points)
+        print('Points Received: ', points_list)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for points")
+
+    with open(file.filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return FileResponse(file.filename)
