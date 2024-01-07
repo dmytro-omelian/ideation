@@ -138,6 +138,7 @@ class Point(BaseModel):
 
 @app.post("/uploadfile/points")
 async def create_upload_file(file: UploadFile = File(...), points: str = Form(...)):
+    # FIXME this is not working
     print('File Received. Starting Processing')
     try:
         points_list: List[Point] = json.loads(points)
