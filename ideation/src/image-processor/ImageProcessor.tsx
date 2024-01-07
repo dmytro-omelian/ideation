@@ -3,7 +3,12 @@ import "./image-processor.css";
 import { Switch } from "@mui/material";
 
 type Point = { x: number; y: number };
-type Mode = "points" | "box";
+// type Mode = "points" | "box";
+
+export enum Mode {
+  Points = "points",
+  Box = "box",
+}
 
 interface IState {
   uploadedImage: string | null;
@@ -12,6 +17,23 @@ interface IState {
   boxStart: Point | null;
   boxEnd: Point | null;
   tempBoxEnd: Point | null; // Temporary end point for dynamic box drawing
+  box: Box | null;
+}
+
+type Box = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  label: string;
+};
+
+interface RequestBoxDto {
+  box: Box;
+}
+
+interface RequestPointsDto {
+  points: Point[];
 }
 
 class ImageProcessor extends React.Component<{}, IState> {
@@ -22,11 +44,12 @@ class ImageProcessor extends React.Component<{}, IState> {
     super(props);
     this.state = {
       uploadedImage: null,
-      mode: "points",
+      mode: Mode.Points,
       points: [],
       boxStart: null,
       boxEnd: null,
       tempBoxEnd: null,
+      box: null,
     };
     this.canvasRef = React.createRef<HTMLCanvasElement>();
     this.imageRef = React.createRef<HTMLImageElement>();
@@ -34,7 +57,7 @@ class ImageProcessor extends React.Component<{}, IState> {
 
   handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (
-      this.state.mode === "box" &&
+      this.state.mode === Mode.Box &&
       this.state.boxStart &&
       !this.state.boxEnd
     ) {
@@ -108,9 +131,9 @@ class ImageProcessor extends React.Component<{}, IState> {
       const y = e.clientY - rect.top;
       const { mode, boxStart } = this.state;
 
-      if (mode === "points") {
+      if (mode === Mode.Points) {
         this.addPoint({ x, y });
-      } else if (mode === "box") {
+      } else if (mode === Mode.Box) {
         if (boxStart) {
           this.setState({ boxEnd: { x, y } }, this.drawBox);
         } else {
@@ -150,17 +173,30 @@ class ImageProcessor extends React.Component<{}, IState> {
       );
       ctx.strokeStyle = "red";
       ctx.stroke();
+      this.setState({
+        box: {
+          x: Math.min(boxStart.x, boxEnd.x),
+          y: Math.min(boxStart.y, boxEnd.y),
+          width: Math.abs(boxEnd.x - boxStart.x),
+          height: Math.abs(boxEnd.y - boxStart.y),
+          label: "",
+        },
+      });
       this.setState({ boxStart: null, boxEnd: null });
     }
   };
 
   toggleMode = () => {
-    this.setState((prevState) => ({
-      mode: prevState.mode === "points" ? "box" : "points",
-    }));
+    const { mode } = this.state;
+    this.setState({
+      mode: mode === Mode.Points ? Mode.Box : Mode.Points,
+    });
   };
 
   processImage = () => {
+    const { mode, points, box } = this.state;
+    console.log(box);
+
     const imageInput = document.getElementById(
       "image-processor-input"
     ) as HTMLInputElement;
@@ -169,10 +205,18 @@ class ImageProcessor extends React.Component<{}, IState> {
       const file = imageInput.files[0];
       console.log("Processing image:", file.name);
 
+      const url = `http://localhost:8000/uploadfile/${mode}`;
       const formData = new FormData();
+      if (mode === Mode.Box) {
+        formData.append("box", JSON.stringify(box));
+      } else {
+        console.log(JSON.stringify(points));
+        formData.append("points", JSON.stringify(points));
+      }
+
       formData.append("file", file);
 
-      fetch("http://localhost:8000/uploadfile", {
+      fetch(url, {
         method: "POST",
         body: formData,
       })
@@ -282,10 +326,10 @@ class ImageProcessor extends React.Component<{}, IState> {
           <div>
             <Switch
               onClick={this.toggleMode}
-              checked={mode === "points"}
+              checked={mode === Mode.Points}
               color="secondary"
             />
-            <span>{mode === "points" ? "Draw points" : "Draw box"}</span>
+            <span>{mode === Mode.Points ? "Draw points" : "Draw box"}</span>
           </div>
           <button className="control-button" onClick={this.processImage}>
             <span role="img" aria-label="Process">
