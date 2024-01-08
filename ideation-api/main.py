@@ -32,19 +32,31 @@ def initialize_model():
 
 def process_image_with_model(image_path, default_box: Box, predictor: SamPredictor):
     image_bgr = cv2.imread(image_path)
+
+    if image_bgr is None:
+        print("Error: Image not found or unable to read.")
+        return
+
     image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+
+    height, width = image_bgr.shape[:2]
+    print(f"Image size: Width = {width}, Height = {height}")
 
     predictor.set_image(image_rgb)
     print('Predicting')
+
+    scale_factor: float = width / 600
+
     # TODO load file with default box drawn to check if we get the correct box from the file
-    box_dto = np.array([
-        default_box['x'],
-        default_box['y'],
-        default_box['x'] + default_box['width'],
-        default_box['y'] + default_box['height']
+    box_coords = np.array([
+        default_box['x'] * scale_factor,
+        default_box['y'] * scale_factor,
+        (default_box['x'] + default_box['width']) * scale_factor,
+        (default_box['y'] + default_box['height']) * scale_factor
     ])
+
     masks, _, _ = predictor.predict(
-        box=box_dto,
+        box=box_coords,
         multimask_output=False
     )
     print('Masks Generated')
