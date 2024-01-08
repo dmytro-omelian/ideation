@@ -1,6 +1,6 @@
 import React from "react";
 import "./image-processor.css";
-import { Switch } from "@mui/material";
+import { CircularProgress, Switch } from "@mui/material";
 
 type Point = { x: number; y: number };
 // type Mode = "points" | "box";
@@ -26,6 +26,7 @@ interface IState {
   boxEnd: Point | null;
   tempBoxEnd: Point | null; // Temporary end point for dynamic box drawing
   box: Box | null;
+  isLoading: boolean;
 }
 
 type Box = {
@@ -58,6 +59,7 @@ class ImageProcessor extends React.Component<{}, IState> {
       boxEnd: null,
       tempBoxEnd: null,
       box: null,
+      isLoading: false,
     };
     this.canvasRef = React.createRef<HTMLCanvasElement>();
     this.imageRef = React.createRef<HTMLImageElement>();
@@ -237,6 +239,7 @@ class ImageProcessor extends React.Component<{}, IState> {
     ) as HTMLInputElement;
 
     if (imageInput && imageInput.files && imageInput.files.length > 0) {
+      this.setState({ isLoading: true });
       const file = imageInput.files[0];
       console.log("Processing image:", file.name);
 
@@ -272,7 +275,10 @@ class ImageProcessor extends React.Component<{}, IState> {
           const imageUrl = URL.createObjectURL(blob);
           this.setState({ uploadedImage: imageUrl });
         })
-        .catch((error) => console.error("Error:", error));
+        .catch((error) => console.error("Error:", error))
+        .finally(() => {
+          this.setState({ isLoading: false });
+        });
     } else {
       console.log("No file selected.");
     }
@@ -302,54 +308,63 @@ class ImageProcessor extends React.Component<{}, IState> {
   };
 
   render() {
-    const { uploadedImage, mode } = this.state;
+    const { uploadedImage, mode, isLoading } = this.state;
+
+    // if (isLoading) {
+    //   return <div className="image-processor-container spinner"></div>;
+    // }
 
     return (
       <div className="image-processor-container">
-        <h2 className="image-processor-title">Image Processor</h2>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={this.handleImageChange}
-          className="image-uploader-input"
-          multiple
-          style={{ display: "none" }}
-          id="image-processor-input"
-        />
-        {!uploadedImage && (
-          <button
-            onClick={() =>
-              document.getElementById("image-processor-input")?.click()
-            }
-            className="image-uploader-button"
-          >
-            <span className="plus-icon">+</span> Upload Image
-          </button>
-        )}
+        {isLoading && <CircularProgress color="secondary" />}
+        {!isLoading && (
+          <div>
+            <h2 className="image-processor-title">Image Processor</h2>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={this.handleImageChange}
+              className="image-uploader-input"
+              multiple
+              style={{ display: "none" }}
+              id="image-processor-input"
+            />
+            {!uploadedImage && (
+              <button
+                onClick={() =>
+                  document.getElementById("image-processor-input")?.click()
+                }
+                className="image-uploader-button"
+              >
+                <span className="plus-icon">+</span> Upload Image
+              </button>
+            )}
 
-        {uploadedImage && (
-          <div
-            className="image-display-container"
-            onMouseMove={this.handleMouseMove}
-            style={{ position: "relative" }}
-          >
-            <img
-              src={uploadedImage}
-              alt="Uploaded"
-              className="image-display"
-              ref={this.imageRef}
-              onLoad={this.adjustCanvasSize}
-            />
-            <canvas
-              ref={this.canvasRef}
-              className="image-canvas"
-              onClick={this.handleClickOnCanvas}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-              }}
-            />
+            {uploadedImage && (
+              <div
+                className="image-display-container"
+                onMouseMove={this.handleMouseMove}
+                style={{ position: "relative" }}
+              >
+                <img
+                  src={uploadedImage}
+                  alt="Uploaded"
+                  className="image-display"
+                  ref={this.imageRef}
+                  onLoad={this.adjustCanvasSize}
+                />
+                <canvas
+                  ref={this.canvasRef}
+                  className="image-canvas"
+                  onClick={this.handleClickOnCanvas}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                />
+              </div>
+            )}
           </div>
         )}
 
