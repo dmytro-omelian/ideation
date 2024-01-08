@@ -205,6 +205,17 @@ class ImageProcessor extends React.Component<{}, IState> {
           label: "",
         },
       });
+      console.log(
+        JSON.stringify({
+          box: {
+            x: Math.min(boxStart.x, boxEnd.x),
+            y: Math.min(boxStart.y, boxEnd.y),
+            width: Math.abs(boxEnd.x - boxStart.x),
+            height: Math.abs(boxEnd.y - boxStart.y),
+            label: "",
+          },
+        })
+      );
       this.setState({ boxStart: null, boxEnd: null });
     }
   };
