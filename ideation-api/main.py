@@ -45,7 +45,7 @@ def process_image_with_model(image_path, default_box: Box, predictor: SamPredict
     predictor.set_image(image_rgb)
     print('Predicting')
 
-    scale_factor: float = width / 600
+    scale_factor: float = width / 600 # FIXME receive this parameter from frontend
 
     # TODO load file with default box drawn to check if we get the correct box from the file
     box_coords = np.array([
