@@ -1,17 +1,48 @@
 import React from "react";
 import "./image-processor.css";
-import { Switch } from "@mui/material";
+import { CircularProgress, Switch } from "@mui/material";
 
 type Point = { x: number; y: number };
-type Mode = "points" | "box";
+// type Mode = "points" | "box";
+
+export enum Mode {
+  Points = "points",
+  Box = "box",
+}
+
+interface uploadedImage {
+  imageUrl: string;
+  width: string;
+  height: string;
+}
 
 interface IState {
   uploadedImage: string | null;
+  uploadedImageHeight?: number;
+  uploadedImageWidth?: number;
   mode: Mode;
   points: Point[];
   boxStart: Point | null;
   boxEnd: Point | null;
   tempBoxEnd: Point | null; // Temporary end point for dynamic box drawing
+  box: Box | null;
+  isLoading: boolean;
+}
+
+type Box = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  label: string;
+};
+
+interface RequestBoxDto {
+  box: Box;
+}
+
+interface RequestPointsDto {
+  points: Point[];
 }
 
 class ImageProcessor extends React.Component<{}, IState> {
@@ -22,11 +53,13 @@ class ImageProcessor extends React.Component<{}, IState> {
     super(props);
     this.state = {
       uploadedImage: null,
-      mode: "points",
+      mode: Mode.Points,
       points: [],
       boxStart: null,
       boxEnd: null,
       tempBoxEnd: null,
+      box: null,
+      isLoading: false,
     };
     this.canvasRef = React.createRef<HTMLCanvasElement>();
     this.imageRef = React.createRef<HTMLImageElement>();
@@ -34,7 +67,7 @@ class ImageProcessor extends React.Component<{}, IState> {
 
   handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (
-      this.state.mode === "box" &&
+      this.state.mode === Mode.Box &&
       this.state.boxStart &&
       !this.state.boxEnd
     ) {
@@ -84,7 +117,22 @@ class ImageProcessor extends React.Component<{}, IState> {
     if (event.target.files && event.target.files[0]) {
       const fileReader = new FileReader();
       fileReader.onload = (e: ProgressEvent<FileReader>) => {
-        this.setState({ uploadedImage: e.target?.result as string });
+        const imageUrl = e.target?.result as string;
+
+        // Create an image object
+        const img = new Image();
+        img.onload = () => {
+          // Now img.width and img.height hold the image's dimensions
+          console.log("Image width:", img.width, "Image height:", img.height);
+
+          this.setState({
+            uploadedImageWidth: img.width,
+            uploadedImageHeight: img.height,
+          });
+        };
+        img.src = imageUrl;
+
+        this.setState({ uploadedImage: imageUrl });
       };
       fileReader.readAsDataURL(event.target.files[0]);
     }
@@ -108,9 +156,9 @@ class ImageProcessor extends React.Component<{}, IState> {
       const y = e.clientY - rect.top;
       const { mode, boxStart } = this.state;
 
-      if (mode === "points") {
+      if (mode === Mode.Points) {
         this.addPoint({ x, y });
-      } else if (mode === "box") {
+      } else if (mode === Mode.Box) {
         if (boxStart) {
           this.setState({ boxEnd: { x, y } }, this.drawBox);
         } else {
@@ -150,29 +198,67 @@ class ImageProcessor extends React.Component<{}, IState> {
       );
       ctx.strokeStyle = "red";
       ctx.stroke();
+      this.setState({
+        box: {
+          x: Math.min(boxStart.x, boxEnd.x),
+          y: Math.min(boxStart.y, boxEnd.y),
+          width: Math.abs(boxEnd.x - boxStart.x),
+          height: Math.abs(boxEnd.y - boxStart.y),
+          label: "",
+        },
+      });
+      console.log(
+        JSON.stringify({
+          box: {
+            x: Math.min(boxStart.x, boxEnd.x),
+            y: Math.min(boxStart.y, boxEnd.y),
+            width: Math.abs(boxEnd.x - boxStart.x),
+            height: Math.abs(boxEnd.y - boxStart.y),
+            label: "",
+          },
+        })
+      );
       this.setState({ boxStart: null, boxEnd: null });
     }
   };
 
   toggleMode = () => {
-    this.setState((prevState) => ({
-      mode: prevState.mode === "points" ? "box" : "points",
-    }));
+    const { mode } = this.state;
+    this.setState({
+      mode: mode === Mode.Points ? Mode.Box : Mode.Points,
+    });
   };
 
   processImage = () => {
+    const { mode, points, box, uploadedImageWidth, uploadedImageHeight } =
+      this.state;
+    console.log(box);
+
     const imageInput = document.getElementById(
       "image-processor-input"
     ) as HTMLInputElement;
 
     if (imageInput && imageInput.files && imageInput.files.length > 0) {
+      this.setState({ isLoading: true });
       const file = imageInput.files[0];
       console.log("Processing image:", file.name);
 
+      const url = `http://localhost:8000/uploadfile/${mode}`;
       const formData = new FormData();
+      if (mode === Mode.Box) {
+        formData.append("box", JSON.stringify(box));
+      } else {
+        console.log(JSON.stringify(points));
+        formData.append("points", JSON.stringify(points));
+      }
+
+      if (uploadedImageHeight && uploadedImageWidth) {
+        formData.append("img_width", uploadedImageWidth as unknown as string);
+        formData.append("img_height", uploadedImageHeight as unknown as string);
+      }
       formData.append("file", file);
 
-      fetch("http://localhost:8000/uploadfile", {
+      fetch(url, {
         method: "POST",
         body: formData,
       })
@@ -189,7 +275,10 @@ class ImageProcessor extends React.Component<{}, IState> {
           const imageUrl = URL.createObjectURL(blob);
           this.setState({ uploadedImage: imageUrl });
         })
-        .catch((error) => console.error("Error:", error));
+        .catch((error) => console.error("Error:", error))
+        .finally(() => {
+          this.setState({ isLoading: false });
+        });
     } else {
       console.log("No file selected.");
     }
@@ -219,54 +308,63 @@ class ImageProcessor extends React.Component<{}, IState> {
   };
 
   render() {
-    const { uploadedImage, mode } = this.state;
+    const { uploadedImage, mode, isLoading } = this.state;
+
+    // if (isLoading) {
+    //   return <div className="image-processor-container spinner"></div>;
+    // }
 
     return (
       <div className="image-processor-container">
-        <h2 className="image-processor-title">Image Processor</h2>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={this.handleImageChange}
-          className="image-uploader-input"
-          multiple
-          style={{ display: "none" }}
-          id="image-processor-input"
-        />
-        {!uploadedImage && (
-          <button
-            onClick={() =>
-              document.getElementById("image-processor-input")?.click()
-            }
-            className="image-uploader-button"
-          >
-            <span className="plus-icon">+</span> Upload Image
-          </button>
-        )}
+        {isLoading && <CircularProgress color="secondary" />}
+        {!isLoading && (
+          <div>
+            <h2 className="image-processor-title">Image Processor</h2>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={this.handleImageChange}
+              className="image-uploader-input"
+              multiple
+              style={{ display: "none" }}
+              id="image-processor-input"
+            />
+            {!uploadedImage && (
+              <button
+                onClick={() =>
+                  document.getElementById("image-processor-input")?.click()
+                }
+                className="image-uploader-button"
+              >
+                <span className="plus-icon">+</span> Upload Image
+              </button>
+            )}
 
-        {uploadedImage && (
-          <div
-            className="image-display-container"
-            onMouseMove={this.handleMouseMove}
-            style={{ position: "relative" }}
-          >
-            <img
-              src={uploadedImage}
-              alt="Uploaded"
-              className="image-display"
-              ref={this.imageRef}
-              onLoad={this.adjustCanvasSize}
-            />
-            <canvas
-              ref={this.canvasRef}
-              className="image-canvas"
-              onClick={this.handleClickOnCanvas}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-              }}
-            />
+            {uploadedImage && (
+              <div
+                className="image-display-container"
+                onMouseMove={this.handleMouseMove}
+                style={{ position: "relative" }}
+              >
+                <img
+                  src={uploadedImage}
+                  alt="Uploaded"
+                  className="image-display"
+                  ref={this.imageRef}
+                  onLoad={this.adjustCanvasSize}
+                />
+                <canvas
+                  ref={this.canvasRef}
+                  className="image-canvas"
+                  onClick={this.handleClickOnCanvas}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -282,10 +380,10 @@ class ImageProcessor extends React.Component<{}, IState> {
           <div>
             <Switch
               onClick={this.toggleMode}
-              checked={mode === "points"}
+              checked={mode === Mode.Points}
               color="secondary"
             />
-            <span>{mode === "points" ? "Draw points" : "Draw box"}</span>
+            <span>{mode === Mode.Points ? "Draw points" : "Draw box"}</span>
           </div>
           <button className="control-button" onClick={this.processImage}>
             <span role="img" aria-label="Process">

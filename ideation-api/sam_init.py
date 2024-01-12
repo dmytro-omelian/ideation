@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     mask_generator = SamAutomaticMaskGenerator(sam)
 
-    IMAGE_PATH = os.path.join(HOME, "data", "dog.jpeg")
+    IMAGE_PATH = os.path.join(HOME, "data", "data/dog.jpeg")
     image_bgr = cv2.imread(IMAGE_PATH)
     image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
