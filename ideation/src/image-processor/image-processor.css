@@ -1,10 +1,56 @@
 .image-processor-container {
   width: 50%;
+  height: 100%;
   padding: 20px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.image-processor-title {
+  margin-bottom: 20px;
+}
+
+.image-processor-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  background-color: #f3e8ff; /* Light purple background */
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* To ensure it stays above other content */
+}
+
+.control-button,
+.image-processor-button,
+.process-image-button {
+  background-color: #e0bbff; /* Light purple */
+  color: #333; /* Dark text color for contrast */
+  border: 2px solid #b384ff; /* Slightly darker purple border */
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.control-button:hover,
+.image-processor-button:hover,
+.process-image-button:hover {
+  background-color: #d1a3ff; /* Slightly darker on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.control-button span,
+.image-processor-button span,
+.process-image-button span {
+  font-size: 24px; /* Icon size */
 }
 
 .image-processor-title {
@@ -22,39 +68,6 @@
   border-radius: 8px; /* Optional rounded corners */
 }
 
-.image-processor-controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.control-button {
-  background: #efefef;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.control-button span {
-  font-size: 24px; /* Icon size */
-}
-
-.image-processor-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.image-processor-button:hover {
-  background-color: #45a049;
-}
-
 .image-uploader-input {
   margin-bottom: 20px;
   width: 100px;
@@ -70,20 +83,6 @@
   height: auto;
   border: 1px solid #ddd;
   border-radius: 4px;
-}
-
-.process-image-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.process-image-button:hover {
-  background-color: #45a049;
 }
 
 .spinner {

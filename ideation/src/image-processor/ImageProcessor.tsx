@@ -310,16 +310,51 @@ class ImageProcessor extends React.Component<{}, IState> {
   render() {
     const { uploadedImage, mode, isLoading } = this.state;
 
-    // if (isLoading) {
-    //   return <div className="image-processor-container spinner"></div>;
-    // }
-
     return (
       <div className="image-processor-container">
         {isLoading && <CircularProgress color="secondary" />}
         {!isLoading && (
           <div>
-            <h2 className="image-processor-title">Image Processor</h2>
+            <div className="image-processor-controls">
+              <button
+                className="control-button"
+                onClick={this.handleOnClickUndo}
+              >
+                <span role="img" aria-label="Undo">
+                  ↩️
+                </span>
+              </button>
+              <div>
+                <Switch
+                  onClick={this.toggleMode}
+                  checked={mode === Mode.Points}
+                  color="secondary"
+                />
+                <span>{mode === Mode.Points ? "Draw points" : "Draw box"}</span>
+              </div>
+              <button className="control-button" onClick={this.processImage}>
+                <span role="img" aria-label="Process">
+                  🔄
+                </span>{" "}
+                Process Image
+              </button>
+              <button
+                className="control-button"
+                onClick={this.handleOnClickDelete}
+              >
+                <span role="img" aria-label="Delete">
+                  🗑️
+                </span>{" "}
+                Delete Image
+              </button>
+              <button className="control-button">
+                <span role="img" aria-label="Save">
+                  💾
+                </span>{" "}
+                Save
+              </button>
+            </div>
+
             <input
               type="file"
               accept="image/*"
@@ -367,43 +402,6 @@ class ImageProcessor extends React.Component<{}, IState> {
             )}
           </div>
         )}
-
-        <div className="image-processor-controls">
-          <button className="control-button" onClick={this.handleOnClickUndo}>
-            <span role="img" aria-label="Undo">
-              ↩️
-            </span>
-          </button>
-          {/* <button className="control-button" onClick={this.toggleMode}>
-            {mode === "points" ? "Switch to Box Mode" : "Switch to Point Mode"}
-          </button> */}
-          <div>
-            <Switch
-              onClick={this.toggleMode}
-              checked={mode === Mode.Points}
-              color="secondary"
-            />
-            <span>{mode === Mode.Points ? "Draw points" : "Draw box"}</span>
-          </div>
-          <button className="control-button" onClick={this.processImage}>
-            <span role="img" aria-label="Process">
-              🔄
-            </span>{" "}
-            Process Image
-          </button>
-          <button className="control-button" onClick={this.handleOnClickDelete}>
-            <span role="img" aria-label="Delete">
-              🗑️
-            </span>{" "}
-            Delete Image
-          </button>
-          <button className="control-button">
-            <span role="img" aria-label="Save">
-              💾
-            </span>{" "}
-            Save
-          </button>
-        </div>
       </div>
     );
   }
