@@ -11,3 +11,4 @@ SAM repo: https://github.com/facebookresearch/segment-anything
 TODO create table from that (status, key takeaways, etc.)
 
 - Segment Anything (https://arxiv.org/abs/2304.02643)
+- MobileSAM repo (https://github.com/ChaoningZhang/MobileSAM)
