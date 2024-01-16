@@ -63,9 +63,9 @@
 
 .selected-image {
   max-width: 100%;
-  height: auto; /* Keep the aspect ratio of the image */
-  border: 3px solid #333; /* Optional border */
-  border-radius: 8px; /* Optional rounded corners */
+  height: auto;
+  border: 3px solid #333;
+  border-radius: 8px;
 }
 
 .image-uploader-input {
