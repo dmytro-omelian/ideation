@@ -3,6 +3,7 @@ import "./image-uploader.css"; // Ensure this CSS file exists and is styled as r
 
 const ImageUploader = () => {
   const [images, setImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -27,6 +28,16 @@ const ImageUploader = () => {
     setImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
+  const handlePrev = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : images.length - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
   return (
     <div className="image-uploader-container">
       <h2 className="image-uploader-title">Image Uploader</h2>
@@ -46,7 +57,7 @@ const ImageUploader = () => {
         <span className="plus-icon">+</span>{" "}
       </button>
       <div className="image-preview-container">
-        {images.map((image, index) => (
+        {/* {images.map((image, index) => (
           <div key={index} className="image-container">
             <img
               src={image}
@@ -60,7 +71,30 @@ const ImageUploader = () => {
               Remove
             </button>
           </div>
-        ))}
+        ))} */}
+        {images.length > 0 && (
+          <div className="slideshow-container">
+            <button className="slide-arrow left-arrow" onClick={handlePrev}>
+              ❮
+            </button>
+            <div className="image-preview-container">
+              <img
+                src={images[currentImageIndex]}
+                alt={`Slide ${currentImageIndex}`}
+                className="image-preview"
+              />
+              <button
+                onClick={() => removeImage(currentImageIndex)}
+                className="remove-image-button"
+              >
+                Remove
+              </button>
+            </div>
+            <button className="slide-arrow right-arrow" onClick={handleNext}>
+              ❯
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
