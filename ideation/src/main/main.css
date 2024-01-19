@@ -1,19 +1,17 @@
 .main-board {
   display: flex;
-  justify-content: space-around; /* Adjust as needed */
-  align-items: center; /* Adjust as needed */
+  justify-content: space-around;
+  align-items: center;
 }
 
-/* Style for ImageUploader */
 .image-uploader {
-  background-color: #ffd700; /* Set your desired background color */
-  padding: 20px; /* Adjust as needed */
+  background-color: #ffd700;
+  padding: 20px;
 }
 
-/* Style for ImageProcessor */
 .image-processor {
-  background-color: #00ff00; /* Set your desired background color */
-  padding: 20px; /* Adjust as needed */
+  background-color: #00ff00;
+  padding: 20px;
 }
 
 body,
@@ -24,14 +22,13 @@ html {
 
 .main-board {
   display: flex;
-  height: 100vh; /* Set height to 100% of the viewport height */
+  height: 90vh;
 }
 
-/* Add styles for ImageUploader and ImageProcessor if needed */
 .image-uploader {
-  flex: 1; /* Take up 50% of the width */
+  flex: 1;
 }
 
 .image-processor {
-  flex: 1; /* Take up 50% of the width */
+  flex: 1;
 }

@@ -2,10 +2,10 @@
   padding-bottom: 20px;
   width: 50%;
   margin: auto;
-  display: flex; /* Set to flex to use flexbox properties */
-  flex-direction: column; /* Stack children elements in a column */
-  align-items: center; /* Center children elements horizontally */
-  justify-content: center; /* Center children elements vertically if there's space */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .image-uploader-title {
@@ -21,16 +21,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-y: auto; /* Enables vertical scrolling */
-  max-height: 600px; /* Adjust the max height as needed */
+  overflow-y: auto;
+  max-height: 600px;
   gap: 10px;
 
   padding-right: 4px;
 }
 
 .image-preview {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   object-fit: cover;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -55,7 +55,7 @@
 }
 
 .image-uploader-button:hover {
-  background-color: #e1e1e1;
+  background-color: #f3e8ff;
 }
 
 .remove-image-button {
@@ -75,7 +75,7 @@
 }
 
 .remove-image-button:hover {
-  background-color: #e1e1e1;
+  background-color: #f3e8ff;
 }
 
 .image-container {
@@ -88,7 +88,7 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 10px;
-  background: white;
+  background: #f3e8ff;
 }
 
 .image-uploader-input {
@@ -106,7 +106,7 @@
 
 .image-preview-container:hover::-webkit-scrollbar-thumb,
 .image-preview-container:active::-webkit-scrollbar-thumb {
-  background: #888; /* Set to desired scrollbar thumb color */
+  background: #f3e8ff; /* Set to desired scrollbar thumb color */
 }
 
 .image-preview-container {
@@ -116,7 +116,7 @@
 
 .image-preview-container:hover,
 .image-preview-container:active {
-  scrollbar-color: #888 transparent; /* Set to desired scrollbar thumb color */
+  scrollbar-color: #f3e8ff transparent; /* Set to desired scrollbar thumb color */
 }
 
 @media (max-width: 768px) {
@@ -134,14 +134,13 @@
 }
 
 .slide-arrow {
-  background-color: #fff;
   border: none;
   cursor: pointer;
   padding: 10px;
   margin: 0 10px;
   font-size: 24px;
   color: #333;
-  position: absolute;
+  /* position: absolute; */
   top: 50%;
   transform: translateY(-50%);
 }

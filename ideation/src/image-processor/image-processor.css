@@ -17,22 +17,22 @@
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
-  background-color: #f3e8ff; /* Light purple background */
+  background-color: #f3e8ff;
   padding: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 
-  position: sticky;
+  /* position: sticky;
   top: 0;
-  z-index: 1000; /* To ensure it stays above other content */
+  z-index: 1000; */
 }
 
 .control-button,
 .image-processor-button,
 .process-image-button {
-  background-color: #e0bbff; /* Light purple */
-  color: #333; /* Dark text color for contrast */
-  border: 2px solid #b384ff; /* Slightly darker purple border */
+  background-color: #ffffff;
+  color: #333;
+  border: 2px solid #b384ff;
   border-radius: 4px;
   padding: 10px 15px;
   cursor: pointer;
@@ -43,14 +43,14 @@
 .control-button:hover,
 .image-processor-button:hover,
 .process-image-button:hover {
-  background-color: #d1a3ff; /* Slightly darker on hover */
+  background-color: #ebd7ff; /* Slightly darker on hover */
   transform: translateY(-2px); /* Slight lift effect */
 }
 
 .control-button span,
 .image-processor-button span,
 .process-image-button span {
-  font-size: 24px; /* Icon size */
+  font-size: 24px;
 }
 
 .image-processor-title {
