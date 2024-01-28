@@ -229,6 +229,21 @@ class ImageProcessor extends React.Component<{}, IState> {
     });
   };
 
+  saveImage = (imageUrl: string) => {
+    // Download the image with the name "ideation_results"
+    const a = document.createElement("a");
+    a.href = imageUrl;
+    a.download = "ideation_results.png";
+    a.click();
+  };
+
+  saveImageOnClick = () => {
+    const { uploadedImage } = this.state;
+    if (uploadedImage) {
+      this.saveImage(uploadedImage);
+    }
+  };
+
   processImage = () => {
     const { mode, points, box, uploadedImageWidth, uploadedImageHeight } =
       this.state;
@@ -347,7 +362,10 @@ class ImageProcessor extends React.Component<{}, IState> {
                 </span>{" "}
                 Delete Image
               </button>
-              <button className="control-button">
+              <button
+                className="control-button"
+                onClick={this.saveImageOnClick}
+              >
                 <span role="img" aria-label="Save">
                   💾
                 </span>{" "}
