@@ -190,7 +190,8 @@ async def say_hello(name: str):
 #     return FileResponse(segmented_image_path)
 
 @app.post("/uploadfile/box")
-async def create_upload_file(file: UploadFile = File(...), box: str = Form(...), style_file: UploadFile = File(...)):
+async def create_upload_file(file: UploadFile = File(...), box: str = Form(...)):
+    # style_file: UploadFile = File(...)
     print('File Received. Starting Processing')
     try:
         box: Box = json.loads(box)
@@ -201,8 +202,8 @@ async def create_upload_file(file: UploadFile = File(...), box: str = Form(...),
     with open(file.filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    with open(style_file.filename, "wb") as buffer:
-        shutil.copyfileobj(style_file.file, buffer)
+    # with open(style_file.filename, "wb") as buffer:
+    #     shutil.copyfileobj(style_file.file, buffer)
 
     mask = process_image_with_model_and_get_mask(file.filename, box, sam_predictor)
 
