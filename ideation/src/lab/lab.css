@@ -1,0 +1,40 @@
+.buttons-menu {
+  display: flex;
+  justify-content: space-between;
+}
+
+.buttons-menu > div {
+  display: flex;
+}
+
+.buttons-menu > div:first-child {
+  justify-content: flex-start;
+}
+
+.buttons-menu > div:last-child {
+  justify-content: flex-end;
+}
+
+.buttons-menu button {
+  margin: 0 5px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buttons-menu button:hover {
+  background-color: #0056b3;
+}
+
+.processing-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: 50px;
+  margin-bottom: 100px;
+  background-color: #007bff;
+}

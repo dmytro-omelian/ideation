@@ -14,6 +14,12 @@
   padding: 20px;
 }
 
+.landing-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 body,
 html {
   height: 100%;
@@ -22,7 +28,7 @@ html {
 
 .main-board {
   display: flex;
-  height: 90vh;
+  height: 70vh;
 }
 
 .image-uploader {
@@ -31,4 +37,16 @@ html {
 
 .image-processor {
   flex: 1;
+}
+
+.start-button {
+  width: 200px;
+  margin-bottom: 5%;
+
+  background-color: white;
+  border: 1px solid #000000;
+  border-radius: 15px;
+  padding: 10px 20px; /* Adjust padding as needed */
+  font-size: 16px; /* Adjust font size as needed */
+  cursor: pointer; /* Add pointer cursor to indicate interactivity */
 }
