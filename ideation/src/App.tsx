@@ -3,8 +3,8 @@ import "./App.css";
 import Header from "./header/Header";
 import Main from "./main/Main";
 import Footer from "./footer/Footer";
-import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
-import Lab from "./lab/Lab";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Lab from "./lab/Lab.component";
 
 function App() {
   return (

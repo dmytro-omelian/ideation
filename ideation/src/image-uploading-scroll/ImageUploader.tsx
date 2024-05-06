@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./image-uploader.css"; // Ensure this CSS file exists and is styled as required
+import ImageFrame from "../ImageFrame.component";
 
 const ImageUploader = () => {
   const [images, setImages] = useState<string[]>([]);
@@ -41,7 +42,7 @@ const ImageUploader = () => {
   return (
     <div className="image-uploader-container">
       <h2 className="image-uploader-title">Image Uploader</h2>
-      <input
+      {/* <input
         type="file"
         accept="image/*"
         onChange={handleImageChange}
@@ -49,40 +50,21 @@ const ImageUploader = () => {
         multiple
         style={{ display: "none" }}
         id="file-input"
-      />
-      <button
+      /> */}
+      {/* <button
         onClick={() => document.getElementById("file-input")?.click()}
         className="image-uploader-button"
       >
         <span className="plus-icon">+</span>{" "}
-      </button>
-      <div className="image-preview-container">
-        {/* {images.map((image, index) => (
-          <div key={index} className="image-container">
-            <img
-              src={image}
-              alt={`Selected ${index}`}
-              className="image-preview"
-            />
-            <button
-              onClick={() => removeImage(index)}
-              className="remove-image-button"
-            >
-              Remove
-            </button>
-          </div>
-        ))} */}
+      </button> */}
+      {/* <div className="image-preview-container">
         {images.length > 0 && (
           <div className="slideshow-container">
             <button className="slide-arrow left-arrow" onClick={handlePrev}>
               ❮
             </button>
             <div className="image-preview-container">
-              <img
-                src={images[currentImageIndex]}
-                alt={`Slide ${currentImageIndex}`}
-                className="image-preview"
-              />
+              <ImageFrame image={images[currentImageIndex]} />
               <button
                 onClick={() => removeImage(currentImageIndex)}
                 className="remove-image-button"
@@ -95,7 +77,7 @@ const ImageUploader = () => {
             </button>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
