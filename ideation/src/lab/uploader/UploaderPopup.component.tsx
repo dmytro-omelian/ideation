@@ -1,18 +1,24 @@
-import { Modal, Button, Select, message, UploadFile } from "antd";
+import { Modal, Select, message } from "antd";
 import { SetStateAction, useState } from "react";
+
 import ImageFrame from "../../ImageFrame.component";
 import Dragger from "antd/es/upload/Dragger";
+import { UploaderModalSubmit } from "../Lab.component";
 
 const { Option } = Select;
 
 interface UploaderPopupProps {
+  handleOnModalSubmit: (props: UploaderModalSubmit) => void;
   isImageUploaderEnabled: boolean;
   handleImageUploaderOnClick: () => void;
 }
 
 export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
-  const { handleImageUploaderOnClick, isImageUploaderEnabled } =
-    uploaderPopupProps;
+  const {
+    handleOnModalSubmit: handleOnModelSubmit,
+    handleImageUploaderOnClick,
+    isImageUploaderEnabled,
+  } = uploaderPopupProps;
   const [selectedStyle, setSelectedStyle] = useState("style");
   const [image, setImage] = useState<string | null>(null);
 
@@ -22,6 +28,15 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
 
   function handleOnRemoveClick() {
     setImage(null);
+  }
+
+  function handleOnOkClick() {
+    const uploadSubmitObj = {
+      uploadedImage: image,
+      style: selectedStyle,
+    } as UploaderModalSubmit;
+
+    handleOnModelSubmit(uploadSubmitObj);
   }
 
   function handleRequest(request: { file: any }) {
@@ -47,7 +62,7 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
         title="Upload the image"
         maskClosable={false}
         open={isImageUploaderEnabled}
-        onOk={handleImageUploaderOnClick}
+        onOk={handleOnOkClick}
         onCancel={handleImageUploaderOnClick}
       >
         <div style={{ marginBottom: 16 }}>

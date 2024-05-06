@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "./main.css";
+import { Button } from "antd";
 
 const Main = () => {
   const navigate = useNavigate();
@@ -15,9 +16,7 @@ const Main = () => {
         <div>Nice images</div>
       </div>
       <div className="landing-page">
-        <button className="start-button" onClick={handleStartButton}>
-          Start
-        </button>
+        <Button onClick={handleStartButton}>Start</Button>
       </div>
     </div>
   );

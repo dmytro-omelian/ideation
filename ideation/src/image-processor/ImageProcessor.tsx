@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./image-processor.css";
 import { CircularProgress, Switch } from "@mui/material";
 
@@ -45,14 +45,14 @@ interface RequestPointsDto {
   points: Point[];
 }
 
-class ImageProcessor extends React.Component<{}, IState> {
+class ImageProcessor extends React.Component<{ image: string | null }, IState> {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   imageRef: React.RefObject<HTMLImageElement>;
 
-  constructor(props: {}) {
+  constructor(props: { image: string | null }) {
     super(props);
     this.state = {
-      uploadedImage: null,
+      uploadedImage: props.image,
       mode: Mode.Points,
       points: [],
       boxStart: null,
