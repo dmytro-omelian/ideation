@@ -9,41 +9,31 @@ function handleClick(e: any) {
   console.log("click", e);
 }
 
-// TODO add collections to menu disebar
+// TODO add collections to menu disebar (or at least add Favourite collection)
+// TODO image lab: how to understand if background replacement or style transfering?
 
 export default function Header() {
   const [showMenu, setShowMenu] = useState(false);
 
   const menu = (
     <Menu onClick={handleClick} style={{ width: 256 }} mode="inline">
-      <SubMenu
-        key="sub1"
-        title={
-          <span>
-            <span>Navigation One</span>
-          </span>
-        }
-      >
-        <Menu.ItemGroup title="Item 1">
-          <Menu.Item key="1">
-            <Link to="/">Home</Link>
-          </Menu.Item>
-          <Menu.Item key="2">
-            <Link to="/gallery">Gallery</Link>
-          </Menu.Item>
-          <Menu.Item key="3">
-            <Link to="/lab">Image Lab</Link>
-          </Menu.Item>
-        </Menu.ItemGroup>
-        <Menu.ItemGroup title="Item 2">
-          <Menu.Item key="4">Option 4</Menu.Item>
-        </Menu.ItemGroup>
-      </SubMenu>
+      <Menu.Item key="1">
+        <Link to="/">Home</Link>
+      </Menu.Item>
+      <Menu.Item key="2">
+        <Link to="/gallery">Gallery</Link>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <Link to="/lab">Image Lab</Link>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <Link to="/account">Account</Link>
+      </Menu.Item>
       <SubMenu
         key="sub2"
         title={
           <span>
-            <span>Navigation Two</span>
+            <span>Settings</span>
           </span>
         }
       >
@@ -58,14 +48,14 @@ export default function Header() {
         key="sub4"
         title={
           <span>
-            <span>Navigation Three</span>
+            <span>Collections</span>
           </span>
         }
       >
-        <Menu.Item key="9">Option 9</Menu.Item>
-        <Menu.Item key="10">Option 10</Menu.Item>
-        <Menu.Item key="11">Option 11</Menu.Item>
-        <Menu.Item key="12">Option 12</Menu.Item>
+        <Menu.Item key="9">Favourite</Menu.Item>
+        {/* <Menu.Item key="10">Option 10</Menu.Item> */}
+        {/* <Menu.Item key="11">Option 11</Menu.Item> */}
+        {/* <Menu.Item key="12">Option 12</Menu.Item> */}
       </SubMenu>
     </Menu>
   );
