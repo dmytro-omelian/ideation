@@ -7,7 +7,7 @@ interface PhotoProps {
 
 export default function Photo({ key, photo }: PhotoProps) {
   return (
-    <div className="p-10 w-[200px] h-[200px]">
+    <div className="p-10 w-[300px] h-[300px]">
       <Image src={require(`${photo}`)} />
     </div>
   );
