@@ -36,6 +36,8 @@ export default function ImageUploader({ images }: ImageUploaderProps) {
         </div>
       );
     } else {
+      // TODO add border to the image uploader
+
       return (
         <div className="border-dashed border-black rounded-lg p-8 mx-auto">
           <Empty

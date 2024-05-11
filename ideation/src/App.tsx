@@ -5,6 +5,7 @@ import Main from "./main/Main";
 import Footer from "./footer/Footer";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Lab from "./lab/Lab.component";
+import Gallery from "./gallery/Gallery.component";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/lab" element={<Lab />} />
+        <Route path="/gallery" element={<Gallery />} />
       </Routes>
       <Footer />
     </BrowserRouter>
