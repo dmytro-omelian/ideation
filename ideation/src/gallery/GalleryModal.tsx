@@ -9,6 +9,11 @@ interface GalleryModalProps {
   handleCancel: () => void;
 }
 
+// TODO lets open image that was clicked (in modal, let's manipulate somehow by index and id)
+// TODO add button to load memories and and write new (scrolling with bullet points or something like that)
+// TODO think about use cases and something like that (I can tell cool story about that)
+// TODO add to collections (but dont remove or something like that, help to display nice menu)
+
 export default function GalleryModal({
   selectedPhotos,
   isModalVisible,
