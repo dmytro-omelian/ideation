@@ -16,7 +16,12 @@ export default function Header() {
   const [showMenu, setShowMenu] = useState(false);
 
   const menu = (
-    <Menu onClick={handleClick} style={{ width: 256 }} mode="inline">
+    <Menu
+      className="border h-screen"
+      onClick={handleClick}
+      style={{ width: 256 }}
+      mode="inline"
+    >
       <Menu.Item key="1">
         <Link to="/">Home</Link>
       </Menu.Item>
@@ -26,7 +31,7 @@ export default function Header() {
       <Menu.Item key="3">
         <Link to="/lab">Image Lab</Link>
       </Menu.Item>
-      <Menu.Item key="3">
+      <Menu.Item key="4">
         <Link to="/account">Account</Link>
       </Menu.Item>
       <SubMenu
@@ -81,11 +86,6 @@ export default function Header() {
             className="text-2xl cursor-pointer"
           />
         </div>
-        <Dropdown overlay={menu} trigger={["click"]}>
-          <a className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
-            Menu <DownOutlined />
-          </a>
-        </Dropdown>
       </header>
     </div>
   );
