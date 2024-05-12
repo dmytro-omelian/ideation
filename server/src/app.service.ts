@@ -13,6 +13,7 @@ export class AppService {
   async uploadFile(file) {
     console.log(file);
     const { originalname } = file;
+    // TODO replace original name with user ID + image ID usage
 
     return await this.s3_upload(
       file.buffer,
