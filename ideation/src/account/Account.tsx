@@ -13,8 +13,6 @@ import {
   message,
 } from "antd";
 import { UserOutlined, UploadOutlined } from "@ant-design/icons";
-import ApiService from "./AccountApiService";
-import { title } from "process";
 import axios from "axios";
 
 const { Title, Text } = Typography;
@@ -64,7 +62,6 @@ export default function Account() {
   }, []);
 
   const onFinish = (values: UserPatchDto) => {
-    console.log("Received values:", values);
     const updateData = async () => {
       try {
         setIsLoading(true);

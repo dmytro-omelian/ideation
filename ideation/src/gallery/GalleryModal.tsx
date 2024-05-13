@@ -59,10 +59,10 @@ export default function GalleryModal({
           <Button disabled={currentPhotoIndex === 0} onClick={handlePrevPhoto}>
             Previous
           </Button>
-          <Photo
+          {/* <Photo
             key={currentPhotoIndex}
             photo={selectedPhotos[currentPhotoIndex]}
-          />
+          /> */}
           <div className="flex flex-col">
             <span>Some random text with my own subtitle</span>
             <div className="mt-2">
