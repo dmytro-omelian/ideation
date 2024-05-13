@@ -27,13 +27,43 @@ export default function Gallery() {
 
   const [isVisible, setIsVisible] = useState(false);
 
+  const uploadFile = async (file: File) => {
+    return new Promise<{ filename: string; buffer: ArrayBuffer }>(
+      (resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+
+        reader.onload = () => {
+          const buffer = reader.result as ArrayBuffer;
+          const filename = file.name;
+          resolve({ filename, buffer });
+        };
+
+        reader.onerror = (error) => {
+          reject(new Error("Failed to read file: " + error));
+        };
+      }
+    );
+  };
+
   const handleImageSave = async (imageSaveDto: ImageSaveDto) => {
     console.log(imageSaveDto);
     try {
       setIsLoading(true);
+
+      const { filename, buffer } = await uploadFile(imageSaveDto.image);
+
+      const formData = new FormData();
+      formData.append(
+        "file",
+        new Blob([buffer], { type: imageSaveDto.image.type }),
+        filename
+      );
+      formData.append("caption", imageSaveDto.caption);
+
       const responseData = await axios.post(
         "http://localhost:4000/image",
-        imageSaveDto
+        formData
       );
 
       console.log(responseData.data);

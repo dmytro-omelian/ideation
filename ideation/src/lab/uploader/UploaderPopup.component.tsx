@@ -20,7 +20,7 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
     isImageUploaderEnabled,
   } = uploaderPopupProps;
   const [selectedStyle, setSelectedStyle] = useState("style");
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
 
   function handleChange(value: SetStateAction<string>) {
     setSelectedStyle(value);
@@ -42,14 +42,7 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
   function handleRequest(request: { file: any }) {
     const file = request.file;
     if (file) {
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        const imageBase64 = reader.result as string;
-
-        setImage(imageBase64);
-      };
-      reader.readAsDataURL(file);
+      setImage(file);
       message.success(`${file?.name} file uploaded successfully.`);
     } else {
       message.error(`file upload failed.`);
@@ -80,7 +73,7 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
             {image && (
               <div className="slideshow-container">
                 <div className="image-preview-container">
-                  <ImageFrame image={image} />
+                  {/* <ImageFrame image={image} /> */}
                   <button
                     onClick={handleOnRemoveClick}
                     className="remove-image-button"

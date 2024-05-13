@@ -7,7 +7,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Memory } from 'src/memory/entities/memory.entity';
-import { Image } from 'src/image/image.entity';
+import { Image } from 'src/image/entities/image.entity';
 import { StyleImage } from 'src/image/entities/style-image.entity';
 import { ImageHistory } from 'src/image-history/entities/image-history.entity';
 

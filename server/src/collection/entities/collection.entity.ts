@@ -5,7 +5,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Image } from 'src/image/image.entity';
+import { Image } from 'src/image/entities/image.entity';
 
 @Entity()
 export class Collection {

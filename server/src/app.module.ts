@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './user/entities/user.entity';
-import { Image } from './image/image.entity';
+import { Image } from './image/entities/image.entity';
 import { Collection } from './collection/entities/collection.entity';
 import { StyleImage } from './image/entities/style-image.entity';
 import { ImageHistory } from './image-history/entities/image-history.entity';
@@ -14,6 +14,8 @@ import { MemoryModule } from './memory/memory.module';
 import { ImageHistoryModule } from './image-history/image-history.module';
 import { CollectionModule } from './collection/collection.module';
 import { ImageModule } from './image/image.module';
+import { AwsS3Module } from './aws-s3/aws-s3.module';
+import { MulterModule } from "@nestjs/platform-express";
 
 @Module({
   imports: [
@@ -27,11 +29,15 @@ import { ImageModule } from './image/image.module';
       entities: [User, Image, Collection, StyleImage, ImageHistory, Memory],
       synchronize: true,
     }),
+    MulterModule.register({
+      dest: './uploads',
+    }),
     UserModule,
     MemoryModule,
     ImageModule,
     CollectionModule,
     ImageHistoryModule,
+    AwsS3Module,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -26,7 +26,7 @@ export class AppController {
     return this.appService.uploadFile(file);
   }
 
-  @Get(':key')
+  @Get('test/:key')
   async getImage(@Param('key') key: string, @Res() res: Response) {
     try {
       const s3Url = `https://${this.appService.AWS_S3_BUCKET}.s3.eu-north-1.amazonaws.com/${key}`;

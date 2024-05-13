@@ -17,7 +17,7 @@ export interface ImageSaveDto {
   selectedDate?: string;
   tags: string[];
   caption: string;
-  image: string;
+  image: File;
 }
 
 interface ImageUploaderModalProps {
@@ -41,7 +41,7 @@ export default function ImageUploaderModal({
   const [tagInput, setTagInput] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDateChange = (date: any, dateString: string) => {
@@ -104,14 +104,7 @@ export default function ImageUploaderModal({
   function handleRequest(request: { file: any }) {
     const file = request.file;
     if (file) {
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        const imageBase64 = reader.result as string;
-
-        setImage(imageBase64);
-      };
-      reader.readAsDataURL(file);
+      setImage(file);
       message.success(`${file?.name} file uploaded successfully.`);
     } else {
       message.error(`file upload failed.`);
@@ -171,7 +164,7 @@ export default function ImageUploaderModal({
         <div style={{ display: "flex", flexDirection: "column" }}>
           {image ? (
             <div>
-              <img src={image} />
+              {/* <img src={image} /> */}
               <Alert
                 message="Image was successfully uploaded!"
                 type="success"

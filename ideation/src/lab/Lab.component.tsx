@@ -6,7 +6,7 @@ import UploaderPopup from "./uploader/UploaderPopup.component";
 import { Button, Image, message } from "antd";
 
 export interface UploaderModalSubmit {
-  uploadedImage: string;
+  uploadedImage: File;
   style: string;
 }
 
@@ -18,11 +18,11 @@ export default function Lab() {
   function handleOnModalSubmit(modalSubmitProps: UploaderModalSubmit) {
     const { uploadedImage, style } = modalSubmitProps;
 
-    if (style === "style") {
-      setStyleImages((images) => [...images, uploadedImage]);
-    } else if (style === "content") {
-      setImageToProcess(uploadedImage);
-    }
+    // if (style === "style") {
+    //   setStyleImages((images) => [...images, uploadedImage]);
+    // } else if (style === "content") {
+    //   setImageToProcess(uploadedImage);
+    // }
 
     message.success("was here");
     handleImageUploaderOnClick();

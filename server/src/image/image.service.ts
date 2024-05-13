@@ -1,15 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Image } from './entities/image.entity';
+import { AwsS3Service } from 'src/aws-s3/aws-s3.service';
 
 @Injectable()
 export class ImageService {
-  create(createImageDto: CreateImageDto) {
-    return 'This action adds a new image';
+  constructor(
+    @InjectRepository(Image)
+    private readonly imageRepository: Repository<Image>,
+    @Inject(AwsS3Service) private readonly awsS3Service: AwsS3Service,
+  ) {}
+
+  public async create(createImageDto: CreateImageDto) {
+    const { file: imageFile } = createImageDto;
+    const result = await this.awsS3Service.uploadFile(imageFile);
+
+    console.log(result);
   }
 
-  findAll() {
-    return `This action returns all image`;
+  public async findAll() {
+    const images = await this.imageRepository.find({
+      where: {
+        user: {
+          id: 1,
+        },
+      },
+    });
+
+    return images.slice(0, 10);
   }
 
   findOne(id: number) {

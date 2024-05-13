@@ -1,6 +1,6 @@
 import { User } from 'src/user/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Image } from '../image.entity';
+import { Image } from './image.entity';
 
 @Entity()
 export class StyleImage {
