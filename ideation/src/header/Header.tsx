@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Menu, Dropdown } from "antd";
 import { DownOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
@@ -9,14 +9,33 @@ function handleClick(e: any) {
   console.log("click", e);
 }
 
-// TODO add collections to menu disebar (or at least add Favourite collection)
+// TODO add collections to menu sidebar (or at least add Favourite collection)
 // TODO image lab: how to understand if background replacement or style transfering?
 
 export default function Header() {
   const [showMenu, setShowMenu] = useState(false);
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const menuElement = document.getElementById("menu");
+      if (
+        menuElement &&
+        event.target instanceof Node &&
+        !menuElement.contains(event.target)
+      ) {
+        setShowMenu(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const menu = (
     <Menu
+      id="menu"
       className="border h-screen"
       onClick={handleClick}
       style={{ width: 256 }}
@@ -35,21 +54,6 @@ export default function Header() {
         <Link to="/account">Account</Link>
       </Menu.Item>
       <SubMenu
-        key="sub2"
-        title={
-          <span>
-            <span>Settings</span>
-          </span>
-        }
-      >
-        <Menu.Item key="5">Option 5</Menu.Item>
-        <Menu.Item key="6">Option 6</Menu.Item>
-        <SubMenu key="sub3" title="Submenu">
-          <Menu.Item key="7">Option 7</Menu.Item>
-          <Menu.Item key="8">Option 8</Menu.Item>
-        </SubMenu>
-      </SubMenu>
-      <SubMenu
         key="sub4"
         title={
           <span>
@@ -62,13 +66,25 @@ export default function Header() {
         {/* <Menu.Item key="11">Option 11</Menu.Item> */}
         {/* <Menu.Item key="12">Option 12</Menu.Item> */}
       </SubMenu>
+      <SubMenu
+        key="sub2"
+        title={
+          <span>
+            <span>Settings</span>
+          </span>
+        }
+      >
+        <Menu.Item key="5">Configuration</Menu.Item>
+        <Menu.Item key="6">Support</Menu.Item>
+        <Menu.Item key="6">Log out</Menu.Item>
+      </SubMenu>
     </Menu>
   );
 
   return (
     <div className="flex relative">
       {showMenu && (
-        <aside className="bg-gray-800 text-white w-64 h-full absolute left-0 top-0 z-50">
+        <aside className="bg-white text-black w-64 h-full absolute left-0 top-0 z-50">
           <div className="h-16 flex items-center justify-between p-4">
             <div>Logo</div>
             <CloseOutlined
