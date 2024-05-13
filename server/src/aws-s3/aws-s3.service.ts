@@ -18,7 +18,7 @@ export class AwsS3Service {
 
   // TODO think about the file name (user_id + combine with real name)
   // TODO generate image hash or something like that
-  
+
   async uploadFile(file: any) {
     console.log(file);
     const { originalname } = file;

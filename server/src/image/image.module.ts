@@ -8,6 +8,7 @@ import { AwsS3Module } from 'src/aws-s3/aws-s3.module';
 @Module({
   imports: [TypeOrmModule.forFeature([Image]), AwsS3Module],
   controllers: [ImageController],
+  exports: [ImageService],
   providers: [ImageService],
 })
 export class ImageModule {}

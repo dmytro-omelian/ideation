@@ -15,10 +15,25 @@ export class ImageService {
   ) {}
 
   public async create(createImageDto: CreateImageDto) {
-    const { file: imageFile } = createImageDto;
-    const result = await this.awsS3Service.uploadFile(imageFile);
+    try {
+      const { file: imageFile } = createImageDto;
+      const imageStoredToS3 = await this.awsS3Service.uploadFile(imageFile);
 
-    console.log(result);
+      const partialImage = {
+        imageS3Id: imageFile.originalname,
+        userId: 1,
+        caption: createImageDto.caption,
+        tags: [],
+        date: new Date('2024-05-01'),
+        location: 'Lviv',
+      } as Partial<Image>;
+
+      const image = await this.imageRepository.save(partialImage);
+      return image;
+    } catch (error) {
+      console.error('Error creating image:', error);
+      throw error;
+    }
   }
 
   public async findAll() {

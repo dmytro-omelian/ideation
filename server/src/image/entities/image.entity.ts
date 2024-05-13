@@ -20,7 +20,11 @@ export class Image {
   @Column()
   imageS3Id: string;
 
+  @Column()
+  userId: number;
+  
   @ManyToOne(() => User, (user) => user.images)
+  @JoinTable({ name: 'userId' })
   user: User;
 
   @Column({ nullable: true })

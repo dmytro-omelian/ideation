@@ -11,7 +11,7 @@ export class ImageController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async create(@UploadedFile() file, @Body('caption') caption: string) {
-    return this.imageService.create({ file, caption });
+    return await this.imageService.create({ file, caption });
   }
 
   @Get()
