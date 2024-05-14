@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { DatePicker, Button, Input, message, Tag, Modal } from "antd";
+import { DatePicker, Button, Input, message, Tag, Modal, Spin } from "antd";
 import axios from "axios";
 import Photo from "./Photo.component";
 import GalleryModal from "./GalleryModal";
 import ImageUploaderModal, { ImageSaveDto } from "./ImageUploaderModal";
+import Spinner from "../common/Spinner";
 
 const { RangePicker } = DatePicker;
 
@@ -19,7 +20,7 @@ export interface PhotoI {
 
 export default function Gallery() {
   const [selectedDate, setSelectedDate] = useState<[Date, Date] | null>(null);
-  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [selectedPhotos, setSelectedPhotos] = useState<PhotoI[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [photosByDate, setPhotosByDate] = useState<PhotoI[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -102,7 +103,7 @@ export default function Gallery() {
     setSelectedDate(dates);
   };
 
-  const handlePhotoClick = (photos: string[]) => {
+  const handlePhotoClick = (photos: PhotoI[]) => {
     setSelectedPhotos(photos);
     showModal();
   };
@@ -142,7 +143,7 @@ export default function Gallery() {
   };
 
   if (isLoading || photosByDate.length <= 0) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   // Group photos by date
@@ -194,11 +195,7 @@ export default function Gallery() {
             <h2 className="text-lg mb-2">{date}</h2>
             <Button
               type="primary"
-              onClick={() =>
-                handlePhotoClick(
-                  groupedPhotos[date].map((photo) => photo.imageS3Id)
-                )
-              }
+              onClick={() => handlePhotoClick(groupedPhotos[date])}
             >
               View photos
             </Button>

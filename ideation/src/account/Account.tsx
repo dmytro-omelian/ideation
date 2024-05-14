@@ -14,6 +14,7 @@ import {
 } from "antd";
 import { UserOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import Spinner from "../common/Spinner";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -72,6 +73,7 @@ export default function Account() {
 
         console.log(responseData.data);
         setUser(responseData.data);
+        message.success("Account information updated successfully!");
       } catch (error) {
         console.error("Error:", error);
       } finally {
@@ -80,8 +82,6 @@ export default function Account() {
     };
 
     updateData();
-
-    message.success("Account information updated successfully!");
   };
 
   const uploadProps = {
@@ -100,7 +100,7 @@ export default function Account() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   return (

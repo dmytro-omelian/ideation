@@ -10,12 +10,8 @@ export default function Photo({ key, photo }: PhotoProps) {
   const [imageSrc, setImageSrc] = useState(null);
 
   return (
-    <div className="p-10 w-[300px] h-[300px]">
-      <Image
-        src={`http://localhost:4000/test/${photo}`}
-        width="314"
-        height="314"
-      />
+    <div className="p-10 w-[300px] h-auto">
+      <Image src={`http://localhost:4000/test/${photo}`} />
     </div>
   );
 }

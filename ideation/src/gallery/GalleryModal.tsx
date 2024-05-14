@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Modal, Button, Input, Tag } from "antd";
 
 import Photo from "./Photo.component";
+import { PhotoI } from "./Gallery.component";
+import MemoryView from "./memories/MemoryView";
 
 interface GalleryModalProps {
-  selectedPhotos: string[];
+  selectedPhotos: PhotoI[];
   isModalVisible: boolean;
   handleCancel: () => void;
 }
@@ -20,9 +22,7 @@ export default function GalleryModal({
   handleCancel,
 }: GalleryModalProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [memories, setMemories] = useState<string[]>(
-    Array(selectedPhotos.length).fill("")
-  );
+  const [isMemoriesOpened, setIsMemoryOpened] = useState(false);
 
   const handleNextPhoto = () => {
     setCurrentPhotoIndex(
@@ -37,11 +37,9 @@ export default function GalleryModal({
     );
   };
 
-  const handleMemoriesChange = (index: number, value: string) => {
-    const updatedMemories = [...memories];
-    updatedMemories[index] = value;
-    setMemories(updatedMemories);
-  };
+  function handleOnMemoryClicked() {
+    setIsMemoryOpened(!isMemoriesOpened);
+  }
 
   return (
     <Modal
@@ -55,45 +53,53 @@ export default function GalleryModal({
       ]}
     >
       <div className="flex flex-col items-center">
-        <div className="mb-4">
-          <Button disabled={currentPhotoIndex === 0} onClick={handlePrevPhoto}>
-            Previous
-          </Button>
-          {/* <Photo
-            key={currentPhotoIndex}
-            photo={selectedPhotos[currentPhotoIndex]}
-          /> */}
-          <div className="flex flex-col">
-            <span>Some random text with my own subtitle</span>
-            <div className="mt-2">
-              {["tag 1", "tag 2"].map((tag, tagIndex) => (
-                <Tag key={tagIndex}>{tag}</Tag>
-              ))}
+        {isMemoriesOpened ? (
+          <MemoryView
+            userId={1}
+            imageId={selectedPhotos[currentPhotoIndex].id}
+            handleIsMemoreOpened={handleOnMemoryClicked}
+          />
+        ) : (
+          <div className="mb-4">
+            <Photo
+              key={currentPhotoIndex}
+              photo={selectedPhotos[currentPhotoIndex]?.imageS3Id}
+            />
+            <div className="flex flex-col">
+              <span>{selectedPhotos[currentPhotoIndex]?.caption}</span>
+              <div className="mt-2">
+                {selectedPhotos[currentPhotoIndex]?.tags.map(
+                  (tag, tagIndex) => (
+                    <Tag key={tagIndex}>{tag}</Tag>
+                  )
+                )}
+              </div>
             </div>
-          </div>{" "}
-          <Button
-            disabled={currentPhotoIndex === selectedPhotos.length - 1}
-            onClick={handleNextPhoto}
-          >
-            Next
-          </Button>
-        </div>
-        <Input.TextArea
-          value={memories[currentPhotoIndex]}
-          onChange={(e) =>
-            handleMemoriesChange(currentPhotoIndex, e.target.value)
-          }
-          placeholder="Memories about this place..."
-          autoSize={{ minRows: 3, maxRows: 5 }}
-          className="mb-4"
-        />
-        {/* <div>
-          {selectedPhotos[currentPhotoIndex].tags.map(
-            (tag: string, tagIndex: number) => (
-              <Tag key={tagIndex}>{tag}</Tag>
-            )
-          )}
-        </div> */}
+            <div className="flex flex-row justify-between mt-2">
+              <Button
+                className="w-[49%]"
+                disabled={currentPhotoIndex === 0}
+                onClick={handlePrevPhoto}
+              >
+                Previous
+              </Button>
+              <Button
+                className="w-[49%]"
+                disabled={currentPhotoIndex === selectedPhotos.length - 1}
+                onClick={handleNextPhoto}
+              >
+                Next
+              </Button>
+            </div>
+            <Button
+              type="primary"
+              className="w-full mt-2"
+              onClick={handleOnMemoryClicked}
+            >
+              Open Memories
+            </Button>
+          </div>
+        )}
       </div>
     </Modal>
   );
