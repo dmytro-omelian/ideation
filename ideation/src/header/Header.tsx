@@ -1,6 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Menu, Dropdown } from "antd";
-import { DownOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import { Menu, Dropdown, Tooltip, Typography } from "antd";
+import {
+  QuestionCircleOutlined,
+  HomeOutlined,
+  PictureOutlined,
+  ExperimentOutlined,
+  UserOutlined,
+  SettingOutlined,
+  CloseOutlined,
+  MenuOutlined,
+  AntDesignOutlined,
+} from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
 const { SubMenu } = Menu;
@@ -41,16 +51,16 @@ export default function Header() {
       style={{ width: 256 }}
       mode="inline"
     >
-      <Menu.Item key="1">
+      <Menu.Item key="1" icon={<HomeOutlined />}>
         <Link to="/">Home</Link>
       </Menu.Item>
-      <Menu.Item key="2">
+      <Menu.Item key="2" icon={<PictureOutlined />}>
         <Link to="/gallery">Gallery</Link>
       </Menu.Item>
-      <Menu.Item key="3">
+      <Menu.Item key="3" icon={<ExperimentOutlined />}>
         <Link to="/lab">Image Lab</Link>
       </Menu.Item>
-      <Menu.Item key="4">
+      <Menu.Item key="4" icon={<UserOutlined />}>
         <Link to="/account">Account</Link>
       </Menu.Item>
       <SubMenu
@@ -61,12 +71,14 @@ export default function Header() {
           </span>
         }
       >
-        <Menu.Item key="9">
+        <Menu.Item key="9" icon={<PictureOutlined />}>
           <Link to="/favourite">Favourite</Link>
         </Menu.Item>
-        {/* <Menu.Item key="10">Option 10</Menu.Item> */}
-        {/* <Menu.Item key="11">Option 11</Menu.Item> */}
-        {/* <Menu.Item key="12">Option 12</Menu.Item> */}
+        <Menu.Item key="10" disabled icon={<QuestionCircleOutlined />}>
+          <Tooltip title="Coming soon">
+            <span>Collection Builder</span>
+          </Tooltip>
+        </Menu.Item>
       </SubMenu>
       <SubMenu
         key="sub2"
@@ -76,9 +88,15 @@ export default function Header() {
           </span>
         }
       >
-        <Menu.Item key="5">Configuration</Menu.Item>
-        <Menu.Item key="6">Support</Menu.Item>
-        <Menu.Item key="6">Log out</Menu.Item>
+        <Menu.Item key="5" icon={<SettingOutlined />}>
+          Configuration
+        </Menu.Item>
+        <Menu.Item key="6" icon={<QuestionCircleOutlined />}>
+          Support
+        </Menu.Item>
+        <Menu.Item key="7" icon={<UserOutlined />}>
+          Log out
+        </Menu.Item>
       </SubMenu>
     </Menu>
   );
@@ -88,7 +106,10 @@ export default function Header() {
       {showMenu && (
         <aside className="bg-white text-black w-64 h-full absolute left-0 top-0 z-50">
           <div className="h-16 flex items-center justify-between p-4">
-            <div>Logo</div>
+            <div>
+              <AntDesignOutlined className="mr-1" />
+              <Typography.Text>[ideation]</Typography.Text>
+            </div>
             <CloseOutlined
               className="text-xl cursor-pointer"
               onClick={() => setShowMenu(false)}
