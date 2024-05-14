@@ -2,7 +2,7 @@ import { Button, Empty, Input, message } from "antd";
 import { useEffect, useState } from "react";
 import Spinner from "../../common/Spinner";
 import axios from "axios";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, HeartFilled, HeartOutlined } from "@ant-design/icons";
 
 export interface MemoryViewProps {
   userId: number;
@@ -11,6 +11,7 @@ export interface MemoryViewProps {
 }
 
 export interface IMemory {
+  isFavorite: boolean;
   id: number; // TODO delete memories
   userId: number;
   imageId: number;
@@ -94,6 +95,33 @@ export default function MemoryView({
     }
   };
 
+  const toggleCollectionItem = async (
+    id: number,
+    isFavorite: boolean,
+    collectionId: number
+  ) => {
+    try {
+      setIsLoading(true);
+      const responseData = await axios.patch(
+        `http://localhost:4000/memory/${id}`,
+        { isFavorite: !isFavorite }
+      );
+      setPreviousMemories(
+        previousMemories.map((memory) =>
+          memory.id === id ? responseData.data : memory
+        )
+      );
+      message.success(
+        isFavorite ? "Removed from favorites!" : "Added to favorites!"
+      );
+    } catch (error) {
+      console.error("Error:", error);
+      message.error("Failed to toggle collection item!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -115,11 +143,32 @@ export default function MemoryView({
                 className="flex items-center justify-between mb-2"
               >
                 <div>{memory.text}</div>
-                <Button
-                  type="link"
-                  icon={<DeleteOutlined />}
-                  onClick={() => deleteMemoryLog(memory.id)}
-                />
+                <div className="flex">
+                  {/* Render favorite/unfavorite icon based on favorite status */}
+                  {memory.isFavorite ? (
+                    <Button
+                      type="link"
+                      icon={<HeartFilled />}
+                      onClick={() =>
+                        toggleCollectionItem(memory.id, memory.isFavorite, 1)
+                      }
+                    />
+                  ) : (
+                    <Button
+                      type="link"
+                      icon={<HeartOutlined />}
+                      onClick={() =>
+                        toggleCollectionItem(memory.id, memory.isFavorite, 1)
+                      }
+                    />
+                  )}
+
+                  <Button
+                    type="link"
+                    icon={<DeleteOutlined />}
+                    onClick={() => deleteMemoryLog(memory.id)}
+                  />
+                </div>
               </div>
             );
           })}

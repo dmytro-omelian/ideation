@@ -1,16 +1,20 @@
 import React from "react";
-import "./Footer.css";
 
 const Footer = () => {
   return (
-    <footer className="App-footer">
-      <p>© 2024 Ideation. All rights reserved.</p>
-      <div className="footer-links">
-        <a href="#privacy">Privacy Policy</a>
-        <a href="#terms">Terms of Use</a>
-        <a href="#contact">Contact Us</a>
-      </div>
-      {/* You can also add social media icons here */}
+    <footer className="bg-gray-200 py-4 fixed bottom-0 w-full text-center">
+      {/* <p className="text-gray-600">© 2024 Ideation. All rights reserved.</p> */}
+      {/* <div className="mt-2">
+        <a href="#privacy" className="text-gray-600 hover:text-blue-500 mr-4">
+          Privacy Policy
+        </a>
+        <a href="#terms" className="text-gray-600 hover:text-blue-500 mr-4">
+          Terms of Use
+        </a>
+        <a href="#contact" className="text-gray-600 hover:text-blue-500">
+          Contact Us
+        </a> */}
+      {/* </div> */}
     </footer>
   );
 };

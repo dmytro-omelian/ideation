@@ -29,13 +29,39 @@ export class MemoryService {
 
     return memories;
   }
+  public async findFavorites(userId: number) {
+    const memories = await this.memoryRepository
+      .createQueryBuilder('memory')
+      .innerJoinAndSelect('memory.user', 'user')
+      .innerJoinAndSelect('memory.image', 'image')
+      .where('memory.userId = :userId', { userId })
+      .andWhere('memory.isFavorite = true')
+      .getMany();
+
+
+    return memories;
+  }
+
 
   findOne(id: number) {
     return `This action returns a #${id} memory`;
   }
 
-  update(id: number, updateMemoryDto: UpdateMemoryDto) {
-    return `This action updates a #${id} memory`;
+  async update(id: number, updateMemoryDto: UpdateMemoryDto) {
+    try {
+      const memory = await this.memoryRepository.findOne({ where: { id: id } });
+      if (!memory) {
+        throw new Error('User not found');
+      }
+
+      Object.assign(memory, updateMemoryDto);
+
+      await this.memoryRepository.save(memory);
+
+      return memory;
+    } catch (error) {
+      throw new Error(`Failed to update user: ${error.message}`);
+    }
   }
 
   public async remove(id: number) {

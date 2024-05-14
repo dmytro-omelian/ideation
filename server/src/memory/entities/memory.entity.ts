@@ -1,6 +1,7 @@
 import { Image } from 'src/image/entities/image.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinTable } from "typeorm";
+import { Optional } from "@nestjs/common";
 
 @Entity()
 export class Memory {
@@ -23,4 +24,7 @@ export class Memory {
 
   @Column()
   text: string;
+
+  @Column({ default: false})
+  isFavorite: boolean;
 }

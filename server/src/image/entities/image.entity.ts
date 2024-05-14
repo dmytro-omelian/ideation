@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { StyleImage } from './style-image.entity';
 import { Collection } from 'src/collection/entities/collection.entity';
+import { Optional } from "@nestjs/common";
 
 @Entity()
 export class Image {
