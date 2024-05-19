@@ -4,7 +4,12 @@ import ImageFrame from "../ImageFrame.component";
 import { Empty } from "antd";
 
 interface ImageUploaderProps {
-  images: string[];
+  images: (
+    | File
+    | {
+        url: string;
+      }
+  )[];
 }
 
 export default function ImageUploader({ images }: ImageUploaderProps) {

@@ -6,23 +6,23 @@ import UploaderPopup from "./uploader/UploaderPopup.component";
 import { Button, Image, message } from "antd";
 
 export interface UploaderModalSubmit {
-  uploadedImage: File;
+  uploadedImage: File[];
   style: string;
 }
 
 export default function Lab() {
-  const [styleImages, setStyleImages] = useState<string[]>([]);
+  const [styleImages, setStyleImages] = useState<File[]>([]);
   const [imageToProcess, setImageToProcess] = useState<string | null>(null);
   const [isImageUploaderEnabled, setIsImageUploaderEnabled] = useState(false);
 
   function handleOnModalSubmit(modalSubmitProps: UploaderModalSubmit) {
     const { uploadedImage, style } = modalSubmitProps;
 
-    // if (style === "style") {
-    //   setStyleImages((images) => [...images, uploadedImage]);
-    // } else if (style === "content") {
-    //   setImageToProcess(uploadedImage);
-    // }
+    if (style === "style") {
+      setStyleImages((images) => [...images, ...uploadedImage]);
+    } else if (style === "content") {
+      // setImageToProcess(uploadedImage);
+    }
 
     message.success("was here");
     handleImageUploaderOnClick();

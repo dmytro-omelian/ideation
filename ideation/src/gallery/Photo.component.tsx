@@ -11,7 +11,7 @@ export default function Photo({ key, photo }: PhotoProps) {
 
   return (
     <div className="p-10 w-[300px] h-auto">
-      <Image src={`http://localhost:4000/test/${photo}`} />
+      <Image src={`http://localhost:4000/test?key=${photo}`} />
     </div>
   );
 }

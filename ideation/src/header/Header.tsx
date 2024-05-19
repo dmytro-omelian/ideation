@@ -88,9 +88,6 @@ export default function Header() {
           </span>
         }
       >
-        <Menu.Item key="5" icon={<SettingOutlined />}>
-          Configuration
-        </Menu.Item>
         <Menu.Item key="6" icon={<QuestionCircleOutlined />}>
           Support
         </Menu.Item>

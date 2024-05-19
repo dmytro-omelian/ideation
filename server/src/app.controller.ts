@@ -2,11 +2,11 @@ import {
   Controller,
   Get,
   Param,
-  Post,
+  Post, Query,
   Res,
   UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
 import { Response } from 'express';
@@ -26,16 +26,15 @@ export class AppController {
     return this.appService.uploadFile(file);
   }
 
-  @Get('test/:key')
-  async getImage(@Param('key') key: string, @Res() res: Response) {
+  @Get('test')
+  async getImage(@Query('key') key: string, @Res() res: Response) {
     try {
       const s3Url = `https://${this.appService.AWS_S3_BUCKET}.s3.eu-north-1.amazonaws.com/${key}`;
       console.log(s3Url);
       const imageData = await this.appService.getImageFromS3(s3Url);
 
-      // Set the appropriate content type based on the file extension or MIME type
       res.set({
-        'Content-Type': 'image/png', // Change the content type according to your image type
+        'Content-Type': 'image/png',
         'Content-Length': imageData.length.toString(),
       });
       res.send(imageData);

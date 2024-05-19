@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import cv2
 import supervision as sv
+from starlette.responses import JSONResponse
 
 from style_transfer import run_style_transfer
 import certifi
@@ -212,6 +213,96 @@ async def create_upload_file(file: UploadFile = File(...), box: str = Form(...))
     return FileResponse(output_path)
 
     # return FileResponse(segmented_image_path)
+
+
+import os
+from PIL import Image, ImageFile
+import torch
+import clip
+from fastapi import HTTPException
+from fastapi.responses import JSONResponse
+from typing import List
+from tqdm import tqdm
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+model, preprocess = clip.load('ViT-B/32', device=device)
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+description_map = {
+    "Camille Pissarro - Boulevard Montmartre.jpg": "A bustling city view of Boulevard Montmartre in Paris",
+    "Edvard Munch - Anxiety.jpg": "A painting depicting collective anxiety under a blood-red sky",
+    "Edvard Munch - The Scream.jpg": "A figure with an agonized expression against a turbulent orange sky",
+    "Katsushika Hokusai - Fine Breezy Day.jpg": "A clear day with a gentle breeze in a traditional Japanese style",
+    "Katsushika Hokusai - The Great Wave off Kanagawa.jpg": "A large wave towering over boats near Kanagawa",
+    "Leonardo Da Vinci - Lady with an Ermine.jpg": "A portrait of Cecilia Gallerani holding an ermine",
+    "Leonardo Da Vinci - Portrait of Lisa Gherardini.jpg": "The Mona Lisa, featuring Lisa Gherardini with a serene smile",
+    "Lubo Kristek - Naddas Chord in the Landscape.jpg": "An abstract composition with surreal elements",
+    "Oscar Florianus Bluemner - Old Canal Port.jpg": "A vivid, dynamic expressionist depiction of an old canal port",
+    "Paul Nash - The Menin Road.jpg": "A desolated landscape of The Menin Road after World War I",
+    "Salvador Dali - The Persistence of Memory.jpg": "Melting clocks in a desolate landscape, symbolizing the relativity of time",
+    "Vincent Van Gogh - Le caf de nuit.jpg": "A cafe interior at night in Arles",
+    "Vincent Van Gogh - Sunflowers.jpg": "Vibrant sunflowers in a vase, demonstrating unique style",
+    "Vincent Van Gogh - The bedroom.jpg": "Van Gogh's bedroom in Arles, with bold colors",
+    "Vincent Van Gogh - The Olive Trees.jpg": "A grove of olive trees under a tumultuous sky",
+    "Vincent Van Gogh - The Starry Night (1888).jpg": "An earlier version of Van Gogh's Starry Night",
+    "Vincent Van Gogh - The Starry Night.jpg": "A dreamy interpretation of the night sky over Saint-Rémy-de-Provence",
+    "Vincent Van Gogh - The Yellow House.jpg": "The house Van Gogh lived in in Arles, with bright yellow walls"
+}
+
+def load_and_preprocess_images(dataset_directory):
+    image_features = []
+    filenames = []
+    for filename in tqdm(os.listdir(dataset_directory)):
+        try:
+            image_path = os.path.join(dataset_directory, filename)
+            image = Image.open(image_path).convert("RGB")
+            image = preprocess(image).unsqueeze(0).to(device)
+            image_features.append(model.encode_image(image))
+            filenames.append(filename)
+        except (IOError, OSError) as e:
+            print(f"Error processing image {filename}: {e}")
+            continue
+
+    return torch.cat(image_features, dim=0), filenames
+
+def find_similar_images(text, image_features, filenames, top_k=3):
+    text_tokens = clip.tokenize([text]).to(device)
+    with torch.no_grad():
+        text_features = model.encode_text(text_tokens)
+        similarities = (text_features @ image_features.T).squeeze(0)
+        top_images_indices = similarities.topk(top_k).indices.tolist()
+
+    return [filenames[i] for i in top_images_indices]
+
+def calculate_recall_at_5(recommended_images, description):
+    relevant_images = [filename for filename, desc in description_map.items() if description.lower() in desc.lower()]
+    recommended_set = set(recommended_images)
+    relevant_set = set(relevant_images)
+    recall_at_5 = len(recommended_set.intersection(relevant_set)) / len(relevant_set) if relevant_set else 0
+    return recall_at_5
+
+
+@app.post("/recommend")
+async def recommend_images(prompt: str):
+    try:
+        recommendations = find_similar_images(prompt, image_features, filenames)
+        recall_score = calculate_recall_at_5(recommendations, prompt)
+        response = {
+            "recommended_images": recommendations,
+            "recall_at_5": recall_score
+        }
+        return JSONResponse(content=response)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.on_event("startup")
+async def startup_event():
+    global image_features, filenames
+    dataset_directory = f"{os.getcwd()}/painting_collection"
+    image_features, filenames = load_and_preprocess_images(dataset_directory)
+
 
 @app.post("/uploadfile/points")
 async def create_upload_file(file: UploadFile = File(...), points: str = Form(...)):

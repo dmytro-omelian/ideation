@@ -1,13 +1,23 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export interface ImageFrameProps {
-  image: string;
+  image: File | { url: string };
   onRemove?: () => void;
 }
 
 export default function ImageFrame({ image, onRemove }: ImageFrameProps) {
-  const [hovered, setHovered] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string>("");
+
+  useEffect(() => {
+    if (image instanceof File) {
+      const objectUrl = URL.createObjectURL(image);
+      setImageSrc(objectUrl);
+
+      return () => URL.revokeObjectURL(objectUrl);
+    } else if ("url" in image) {
+      setImageSrc(image.url);
+    }
+  }, [image]);
 
   return (
     <div className="relative">
@@ -18,7 +28,11 @@ export default function ImageFrame({ image, onRemove }: ImageFrameProps) {
         X
       </span>
       <div>
-        <img src={image} alt={`Slide 1`} className="p-3 image-preview" />
+        <img
+          src={imageSrc}
+          alt={image instanceof File ? image.name : "Recommended"}
+          className="p-3 image-preview"
+        />
       </div>
     </div>
   );
