@@ -32,6 +32,9 @@ export default function Lab() {
     setIsImageUploaderEnabled(!isImageUploaderEnabled);
   }
 
+  function handleOnRemoveStyleImage(imageIndex: number) {
+    setStyleImages(styleImages.filter((_, index) => index !== imageIndex));
+  }
   return (
     <div>
       <div className="buttons-menu">
@@ -47,7 +50,10 @@ export default function Lab() {
         </div>
       </div>
       <div className="main-board">
-        <ImageUploader images={styleImages} />
+        <ImageUploader
+          images={styleImages}
+          handleOnRemoveStyleImage={handleOnRemoveStyleImage}
+        />
         <ImageProcessor image={imageToProcess} />
         {isImageUploaderEnabled && (
           <UploaderPopup

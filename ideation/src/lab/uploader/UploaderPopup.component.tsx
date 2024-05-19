@@ -180,7 +180,7 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
             className="w-full"
             accept="image/*"
             multiple
-            showUploadList={false}
+            showUploadList={true}
             customRequest={handleRequest}
           >
             <p className="text-center text-gray-500">
