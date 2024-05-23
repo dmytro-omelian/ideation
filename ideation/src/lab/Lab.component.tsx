@@ -4,6 +4,7 @@ import ImageUploader from "../image-uploading-scroll/ImageUploader";
 import "./lab.css";
 import UploaderPopup from "./uploader/UploaderPopup.component";
 import { Button, Image, message } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 export interface UploaderModalSubmit {
   uploadedImage: File[];
@@ -37,16 +38,27 @@ export default function Lab() {
   }
   return (
     <div>
-      <div className="buttons-menu">
+      <div className="buttons-menu m-5">
         <div>
-          <Button>X</Button>
+          <Button type="default">
+            <DeleteOutlined />
+          </Button>
 
-          <Button type="default" onClick={handleImageUploaderOnClick}>
+          <Button
+            type="primary"
+            className="ml-2"
+            onClick={handleImageUploaderOnClick}
+          >
             Open Popup
           </Button>
         </div>
         <div>
-          <Button>button 3</Button>
+          <Button type="primary">
+            <div className="flex flex-row items-center justify-center">
+              <EditOutlined />
+              <span className="ml-2">Save Draft</span>
+            </div>
+          </Button>
         </div>
       </div>
       <div className="main-board">

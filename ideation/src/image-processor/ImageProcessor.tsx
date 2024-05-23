@@ -1,6 +1,15 @@
 import React, { useEffect } from "react";
 import "./image-processor.css";
 import { CircularProgress, Switch } from "@mui/material";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlayCircleOutlined,
+  DownloadOutlined,
+  UndoOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import { Button, Empty, message } from "antd";
 
 type Point = { x: number; y: number };
 // type Mode = "points" | "box";
@@ -44,6 +53,10 @@ interface RequestBoxDto {
 interface RequestPointsDto {
   points: Point[];
 }
+
+// TODO we unallow Submit right after image was segmented (show message about that)
+// TODO change process image to segment image, submit to process
+// TODO segment couple of things during the demo
 
 class ImageProcessor extends React.Component<{ image: string | null }, IState> {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -224,13 +237,19 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
 
   toggleMode = () => {
     const { mode } = this.state;
+
     this.setState({
       mode: mode === Mode.Points ? Mode.Box : Mode.Points,
     });
+
+    if (this.state.mode === Mode.Points) {
+      message.info("Now you can set points to select area to segment.");
+    } else {
+      message.info("Now you can draw rectangle to segment object.");
+    }
   };
 
   saveImage = (imageUrl: string) => {
-    // Download the image with the name "ideation_results"
     const a = document.createElement("a");
     a.href = imageUrl;
     a.download = "ideation_results.png";
@@ -239,15 +258,19 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
 
   saveImageOnClick = () => {
     const { uploadedImage } = this.state;
+
     if (uploadedImage) {
       this.saveImage(uploadedImage);
+
+      message.success("Image was successfully downloaded!");
+    } else {
+      message.error("Please upload your image before dowloading it");
     }
   };
 
   processImage = () => {
     const { mode, points, box, uploadedImageWidth, uploadedImageHeight } =
       this.state;
-    console.log(box);
 
     const imageInput = document.getElementById(
       "image-processor-input"
@@ -258,7 +281,7 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
       const file = imageInput.files[0];
       console.log("Processing image:", file.name);
 
-      const url = `http://localhost:8000/uploadfile/${mode}`;
+      const url = `http://localhost:8000/uploadfile/${mode}/segment`;
       const formData = new FormData();
       if (mode === Mode.Box) {
         formData.append("box", JSON.stringify(box));
@@ -293,15 +316,22 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
         .catch((error) => console.error("Error:", error))
         .finally(() => {
           this.setState({ isLoading: false });
+          message.success("Image was processed successfully!");
         });
     } else {
-      console.log("No file selected.");
+      message.error("There is no file selected to process.");
     }
   };
 
   handleOnClickDelete = () => {
-    console.log("Deleting image...");
-    this.setState({ uploadedImage: null });
+    const { uploadedImage } = this.state;
+
+    if (uploadedImage) {
+      this.setState({ uploadedImage: null });
+      message.success("Image was successfully deleted!");
+    } else {
+      message.info("There is no image to delete");
+    }
   };
 
   handleOnClickUndo = () => {
@@ -311,11 +341,14 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
       }),
       this.redrawCanvas
     );
+
+    message.info("Your last action was removed!");
   };
 
   redrawCanvas = () => {
     const { points } = this.state;
     const ctx = this.canvasRef.current?.getContext("2d");
+
     if (ctx) {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear the canvas
       points.forEach((point) => this.drawPoint(point)); // Redraw all points
@@ -326,100 +359,107 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
     const { uploadedImage, mode, isLoading } = this.state;
 
     return (
-      <div className="image-processor-container">
-        {isLoading && <CircularProgress color="secondary" />}
-        {!isLoading && (
-          <div>
-            <div className="image-processor-controls">
-              <button
-                className="control-button"
-                onClick={this.handleOnClickUndo}
-              >
-                <span role="img" aria-label="Undo">
-                  ↩️
-                </span>
-              </button>
-              <div>
-                <Switch
-                  onClick={this.toggleMode}
-                  checked={mode === Mode.Points}
-                  color="secondary"
-                />
-                <span>{mode === Mode.Points ? "Draw points" : "Draw box"}</span>
+      <div className="image-processor-container h-screen">
+        <div>
+          <div className="image-processor-controls">
+            <Button onClick={this.handleOnClickUndo}>
+              <div className="flex flex-row items-center justify-center">
+                <UndoOutlined />
               </div>
-              <button className="control-button" onClick={this.processImage}>
-                <span role="img" aria-label="Process">
-                  🔄
-                </span>{" "}
-                Process Image
-              </button>
-              <button
-                className="control-button"
-                onClick={this.handleOnClickDelete}
-              >
-                <span role="img" aria-label="Delete">
-                  🗑️
-                </span>{" "}
-                Delete Image
-              </button>
-              <button
-                className="control-button"
-                onClick={this.saveImageOnClick}
-              >
-                <span role="img" aria-label="Save">
-                  💾
-                </span>{" "}
-                Save
-              </button>
+            </Button>
+            <div className="flex items-center">
+              <Switch
+                onClick={this.toggleMode}
+                checked={mode === Mode.Points}
+              />
+              {/* <span className="font-semibold">
+                  {mode !== Mode.Points ? "Draw points" : "Draw box"}
+                </span> */}
             </div>
-
-            <input
-              type="file"
-              accept="image/*"
-              onChange={this.handleImageChange}
-              className="image-uploader-input"
-              multiple
-              style={{ display: "none" }}
-              id="image-processor-input"
-            />
-            {!uploadedImage && (
-              <button
-                onClick={() =>
-                  document.getElementById("image-processor-input")?.click()
-                }
-                className="image-uploader-button"
-              >
-                <span className="plus-icon">+</span> Upload Image
-              </button>
-            )}
-
-            {uploadedImage && (
-              <div
-                className="image-display-container"
-                onMouseMove={this.handleMouseMove}
-                style={{ position: "relative" }}
-              >
-                <img
-                  src={uploadedImage}
-                  alt="Uploaded"
-                  className="image-display"
-                  ref={this.imageRef}
-                  onLoad={this.adjustCanvasSize}
-                />
-                <canvas
-                  ref={this.canvasRef}
-                  className="image-canvas"
-                  onClick={this.handleClickOnCanvas}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
-                />
+            <Button onClick={this.processImage}>
+              <div className="flex flex-row items-center justify-center">
+                <PlayCircleOutlined />
+                <span className="ml-2">Segment Image</span>
               </div>
-            )}
+            </Button>
+            <Button onClick={this.handleOnClickDelete}>
+              <div className="flex flex-row items-center justify-center">
+                <DeleteOutlined />
+                <span className="ml-2">Delete Image</span>
+              </div>
+            </Button>
+            <Button onClick={this.saveImageOnClick}>
+              <div className="flex flex-row items-center justify-center">
+                <DownloadOutlined />
+                <span className="ml-2">Download</span>
+              </div>
+            </Button>
           </div>
-        )}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={this.handleImageChange}
+            className="image-uploader-input"
+            multiple
+            style={{ display: "none" }}
+            id="image-processor-input"
+          />
+          {isLoading ? (
+            <CircularProgress
+              className="flex justify-center items-center h-[300px]"
+              color="secondary"
+            />
+          ) : (
+            <div>
+              {!uploadedImage ? (
+                <div>
+                  <div className="flex items-center justify-center h-[300px]">
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description="No image yet"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={() =>
+                      document.getElementById("image-processor-input")?.click()
+                    }
+                  >
+                    <div className="flex flex-row items-center justify-center">
+                      <UploadOutlined />
+                      <span className="ml-2">Upload Image</span>
+                    </div>
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  className="flex justify-center items-center image-display-container"
+                  onMouseMove={this.handleMouseMove}
+                  style={{ position: "relative" }}
+                >
+                  <img
+                    src={uploadedImage}
+                    alt="Uploaded"
+                    className="image-display"
+                    ref={this.imageRef}
+                    onLoad={this.adjustCanvasSize}
+                  />
+                  <canvas
+                    ref={this.canvasRef}
+                    className="image-canvas"
+                    onClick={this.handleClickOnCanvas}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }

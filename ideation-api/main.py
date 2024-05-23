@@ -89,6 +89,54 @@ def process_image_with_model_and_get_mask(image_path, default_box: Box, predicto
 
     return mask
 
+def process_image_with_model_and_get_output_path(image_path, default_box: Box, predictor: SamPredictor):
+    image_bgr = cv2.imread(image_path)
+
+    if image_bgr is None:
+        print("Error: Image not found or unable to read.")
+        return
+
+    image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+
+    height, width = image_bgr.shape[:2]
+    print(f"Image size: Width = {width}, Height = {height}")
+
+    predictor.set_image(image_rgb)
+    print('Predicting')
+
+    scale_factor: float = width / 600 # FIXME receive this parameter from frontend
+
+    # TODO load file with default box drawn to check if we get the correct box from the file
+    box_coords = np.array([
+        default_box['x'] * scale_factor,
+        default_box['y'] * scale_factor,
+        (default_box['x'] + default_box['width']) * scale_factor,
+        (default_box['y'] + default_box['height']) * scale_factor
+    ])
+
+    masks, _, _ = predictor.predict(
+        box=box_coords,
+        multimask_output=False
+    )
+    print('Masks Generated')
+    box_annotator = sv.BoxAnnotator(color=sv.Color.red())
+    mask_annotator = sv.MaskAnnotator(color=sv.Color.red(), color_lookup=sv.ColorLookup.INDEX)
+
+    detections = sv.Detections(
+        xyxy=sv.mask_to_xyxy(masks=masks),
+        mask=masks
+    )
+    detections = detections[detections.area == np.max(detections.area)]
+
+    source_image = box_annotator.annotate(scene=image_bgr.copy(), detections=detections, skip_label=True)
+    cv2.imwrite(os.path.join(os.getcwd(), "data", "source_image.jpeg"), source_image)
+
+    segmented_image = mask_annotator.annotate(scene=image_bgr.copy(), detections=detections)
+    output_path = os.path.join(os.getcwd(), "data", "annotated_image.jpeg")
+    cv2.imwrite(output_path, segmented_image)
+
+    return output_path
+
 
 cnn = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()
 import torchvision.transforms as transforms
@@ -116,7 +164,30 @@ def transfer_style(mask, content_img=None, style_img=None, input_img=None):
         return image.to(device, torch.float)
 
     style_img = image_loader(f"{os.getcwd()}/data/picasso.jpg")
-    content_img = image_loader(f"{os.getcwd()}/data/dancing.jpg")
+    content_img = image_loader(f"{os.getcwd()}/data/dog.jpg")
+
+    # TODO how not to loose image quality for result (not masked image part)
+
+    def crop_to_match(content_img, style_img):
+        _, _, h_c, w_c = content_img.size()  # Get dimensions of content image
+        _, _, h_s, w_s = style_img.size()  # Get dimensions of style image
+
+        # Calculate cropping box (left, upper, right, lower)
+        left = (w_s - w_c) // 2
+        top = (h_s - h_c) // 2
+        right = left + w_c
+        bottom = top + h_c
+
+        # Convert style image to PIL Image to use crop function
+        style_img_pil = transforms.ToPILImage()(style_img.squeeze(0))
+        style_img_cropped = style_img_pil.crop((left, top, right, bottom))
+
+        # Transform back to tensor
+        style_img_cropped = transforms.ToTensor()(style_img_cropped).unsqueeze(0)
+        return style_img_cropped
+
+    # Crop style image to match the size of content image
+    style_img = crop_to_match(content_img, style_img)
 
     assert style_img.size() == content_img.size(), \
         "we need to import style and content images of the same size"
@@ -178,17 +249,20 @@ async def say_hello(name: str):
     return {"message": f"Hello {name}"}
 
 
-# @app.post("/uploadfile")
-# async def create_upload_file(file: UploadFile = File(...)):
-#     print('File Received. Starting Processing')
-#
-#     default_box: Box = {'x': 68, 'y': 247, 'width': 555, 'height': 678, 'label': ''}
-#
-#     with open(file.filename, "wb") as buffer:
-#         shutil.copyfileobj(file.file, buffer)
-#
-#     segmented_image_path = process_image_with_model_and_get_mask(file.filename, default_box, sam_predictor)
-#     return FileResponse(segmented_image_path)
+@app.post("/uploadfile/box/segment")
+async def create_upload_file(file: UploadFile = File(...), box: str = Form(...)):
+    print('File Received. Starting Processing')
+    try:
+        box: Box = json.loads(box)
+        print('Box Received: ', box)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for points")
+
+    with open(file.filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    segmented_image_path = process_image_with_model_and_get_output_path(file.filename, box, sam_predictor)
+    return FileResponse(segmented_image_path)
 
 @app.post("/uploadfile/box")
 async def create_upload_file(file: UploadFile = File(...), box: str = Form(...)):
