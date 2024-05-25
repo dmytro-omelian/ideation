@@ -4,7 +4,11 @@ import ImageUploader from "../image-uploading-scroll/ImageUploader";
 import "./lab.css";
 import UploaderPopup from "./uploader/UploaderPopup.component";
 import { Button, Image, message } from "antd";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 
 export interface UploaderModalSubmit {
   uploadedImage: File[];
@@ -13,6 +17,8 @@ export interface UploaderModalSubmit {
 
 export default function Lab() {
   const [styleImages, setStyleImages] = useState<File[]>([]);
+  const [currentStyleImageIndex, setCurrentStyleImageIndex] =
+    useState<number>(0);
   const [imageToProcess, setImageToProcess] = useState<string | null>(null);
   const [isImageUploaderEnabled, setIsImageUploaderEnabled] = useState(false);
 
@@ -36,27 +42,36 @@ export default function Lab() {
   function handleOnRemoveStyleImage(imageIndex: number) {
     setStyleImages(styleImages.filter((_, index) => index !== imageIndex));
   }
+
+  function getStyleImage(): File | null {
+    if (currentStyleImageIndex < styleImages.length) {
+      return styleImages[currentStyleImageIndex];
+    }
+    message.error("Please upload style image.");
+    return null;
+  }
+
   return (
     <div>
-      <div className="buttons-menu m-5">
+      <div className="buttons-menu m-5 bg-slate-100 p-5 rounded-md">
         <div>
           <Button type="default">
             <DeleteOutlined />
           </Button>
-
+          <Button type="default" className="ml-2">
+            <div className="flex flex-row items-center justify-center">
+              <EditOutlined />
+              <span className="ml-2">Save Draft</span>
+            </div>
+          </Button>
           <Button
             type="primary"
             className="ml-2"
             onClick={handleImageUploaderOnClick}
           >
-            Open Popup
-          </Button>
-        </div>
-        <div>
-          <Button type="primary">
             <div className="flex flex-row items-center justify-center">
-              <EditOutlined />
-              <span className="ml-2">Save Draft</span>
+              <UploadOutlined />
+              <span className="ml-2">Upload style</span>
             </div>
           </Button>
         </div>
@@ -64,9 +79,11 @@ export default function Lab() {
       <div className="main-board">
         <ImageUploader
           images={styleImages}
+          currentStyleImageIndex={currentStyleImageIndex}
+          setCurrentStyleImageIndex={setCurrentStyleImageIndex}
           handleOnRemoveStyleImage={handleOnRemoveStyleImage}
         />
-        <ImageProcessor image={imageToProcess} />
+        <ImageProcessor image={imageToProcess} getStyleImage={getStyleImage} />
         {isImageUploaderEnabled && (
           <UploaderPopup
             handleOnModalSubmit={handleOnModalSubmit}
@@ -75,11 +92,11 @@ export default function Lab() {
           />
         )}
       </div>
-      <div className="processing-button">
+      {/* <div className="processing-button">
         <Button type="primary" className="w-[150px] h-10">
           Submit
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

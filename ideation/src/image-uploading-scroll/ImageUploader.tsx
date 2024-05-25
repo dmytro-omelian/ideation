@@ -5,27 +5,34 @@ import { Empty } from "antd";
 
 interface ImageUploaderProps {
   images: File[];
+  currentStyleImageIndex: number;
+  setCurrentStyleImageIndex: (index: number) => void;
   handleOnRemoveStyleImage: (imageId: number) => void;
 }
 
 export default function ImageUploader({
   images,
+  currentStyleImageIndex,
+  setCurrentStyleImageIndex,
   handleOnRemoveStyleImage,
 }: ImageUploaderProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
   const handlePrev = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex > 0 ? prevIndex - 1 : images.length - 1
-    );
+    const updIndex =
+      currentStyleImageIndex > 0
+        ? currentStyleImageIndex - 1
+        : images.length - 1;
+
+    setCurrentStyleImageIndex(updIndex);
   };
 
   const handleNext = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    const updIndex = (currentStyleImageIndex + 1) % images.length;
+
+    setCurrentStyleImageIndex(updIndex);
   };
 
   const handleDotClick = (index: number) => {
-    setCurrentImageIndex(index);
+    setCurrentStyleImageIndex(index);
   };
 
   const renderDots = () => {
@@ -34,7 +41,9 @@ export default function ImageUploader({
         {images.map((_, index) => (
           <span
             key={index}
-            className={`dot ${index === currentImageIndex ? "active" : ""}`}
+            className={`dot ${
+              index === currentStyleImageIndex ? "active" : ""
+            }`}
             onClick={() => handleDotClick(index)}
           ></span>
         ))}
@@ -52,8 +61,10 @@ export default function ImageUploader({
             </button>
             <div className="image-preview-container">
               <ImageFrame
-                image={images[currentImageIndex]}
-                onRemove={() => handleOnRemoveStyleImage(currentImageIndex)}
+                image={images[currentStyleImageIndex]}
+                onRemove={() =>
+                  handleOnRemoveStyleImage(currentStyleImageIndex)
+                }
               />
             </div>
             <button className="slide-arrow right-arrow" onClick={handleNext}>

@@ -140,7 +140,7 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
             onChange={handleChange}
           >
             <Option value="style">Style Image</Option>
-            <Option value="content">Content Image</Option>
+            {/* <Option value="content">Content Image</Option> */}
           </Select>
         </div>
         {selectedStyle === "style" && (

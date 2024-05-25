@@ -20,7 +20,7 @@ function App() {
         <Route path="/account" element={<Account />} />
         <Route path="/favourite" element={<Collection />} />
       </Routes>
-      <Footer />
+      {/* <Footer /> */}
     </BrowserRouter>
   );
 }

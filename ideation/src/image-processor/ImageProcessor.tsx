@@ -36,6 +36,9 @@ interface IState {
   tempBoxEnd: Point | null; // Temporary end point for dynamic box drawing
   box: Box | null;
   isLoading: boolean;
+  isSegmented: boolean;
+  error: any;
+  originalFile: File | null;
 }
 
 type Box = {
@@ -58,21 +61,30 @@ interface RequestPointsDto {
 // TODO change process image to segment image, submit to process
 // TODO segment couple of things during the demo
 
-class ImageProcessor extends React.Component<{ image: string | null }, IState> {
+class ImageProcessor extends React.Component<
+  { image: string | null; getStyleImage: () => File | null },
+  IState
+> {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   imageRef: React.RefObject<HTMLImageElement>;
 
-  constructor(props: { image: string | null }) {
+  constructor(props: {
+    image: string | null;
+    getStyleImage: () => File | null;
+  }) {
     super(props);
     this.state = {
       uploadedImage: props.image,
-      mode: Mode.Points,
+      mode: Mode.Box,
       points: [],
       boxStart: null,
       boxEnd: null,
       tempBoxEnd: null,
       box: null,
       isLoading: false,
+      isSegmented: false,
+      error: null,
+      originalFile: null,
     };
     this.canvasRef = React.createRef<HTMLCanvasElement>();
     this.imageRef = React.createRef<HTMLImageElement>();
@@ -132,7 +144,6 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
       fileReader.onload = (e: ProgressEvent<FileReader>) => {
         const imageUrl = e.target?.result as string;
 
-        // Create an image object
         const img = new Image();
         img.onload = () => {
           // Now img.width and img.height hold the image's dimensions
@@ -163,6 +174,8 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
   handleClickOnCanvas = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
   ) => {
+    if (this.state.isSegmented) return;
+
     const rect = this.canvasRef.current?.getBoundingClientRect();
     if (rect) {
       const x = e.clientX - rect.left;
@@ -311,12 +324,79 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
         })
         .then((blob) => {
           const imageUrl = URL.createObjectURL(blob);
-          this.setState({ uploadedImage: imageUrl });
+          this.setState({ uploadedImage: imageUrl, originalFile: file });
         })
         .catch((error) => console.error("Error:", error))
         .finally(() => {
-          this.setState({ isLoading: false });
+          this.setState({ isLoading: false, isSegmented: true });
           message.success("Image was processed successfully!");
+        });
+    } else {
+      message.error("There is no file selected to process.");
+    }
+  };
+
+  transferStyle = () => {
+    const { mode, points, box, uploadedImageWidth, uploadedImageHeight } =
+      this.state;
+
+    const imageInput = document.getElementById(
+      "image-processor-input"
+    ) as HTMLInputElement;
+
+    if (imageInput && imageInput.files && imageInput.files.length > 0) {
+      this.setState({ isLoading: true });
+      const file = imageInput.files[0];
+      console.log("Processing image:", file.name);
+
+      const url = `http://localhost:8000/uploadfile/${mode}`;
+      const formData = new FormData();
+      if (mode === "box") {
+        formData.append("box", JSON.stringify(box));
+      } else {
+        console.log("Points:", JSON.stringify(points));
+        formData.append("points", JSON.stringify(points));
+      }
+
+      if (uploadedImageHeight && uploadedImageWidth) {
+        formData.append("img_width", uploadedImageWidth.toString());
+        formData.append("img_height", uploadedImageHeight.toString());
+      }
+      formData.append("file", file);
+      // formData.append("style_file", style_file);
+
+      console.log("Form Data:", formData);
+
+      fetch(url, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          console.log("Response received:", response);
+          if (
+            response.ok &&
+            response.headers.get("Content-Type")?.includes("image")
+          ) {
+            return response.blob();
+          }
+          throw new Error("The response is not an image file.");
+        })
+        .then((blob) => {
+          const imageUrl = URL.createObjectURL(blob);
+          console.log("Image URL created:", imageUrl);
+          this.setState({ uploadedImage: imageUrl });
+        })
+        .catch((error) => {
+          console.error("Error occurred:", error);
+          this.setState({ error: error.message }); // Set state to hold error message
+        })
+        .finally(() => {
+          this.setState({ isLoading: false, isSegmented: true });
+          if (!this.state.error) {
+            message.success("Image was processed successfully!");
+          } else {
+            message.error(`Processing failed: ${this.state.error}`);
+          }
         });
     } else {
       message.error("There is no file selected to process.");
@@ -342,6 +422,12 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
       this.redrawCanvas
     );
 
+    if (this.state.isSegmented) {
+      this.setState({
+        isSegmented: false,
+      });
+    }
+
     message.info("Your last action was removed!");
   };
 
@@ -356,7 +442,7 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
   };
 
   render() {
-    const { uploadedImage, mode, isLoading } = this.state;
+    const { uploadedImage, mode, isLoading, isSegmented } = this.state;
 
     return (
       <div className="image-processor-container h-screen">
@@ -368,20 +454,31 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
               </div>
             </Button>
             <div className="flex items-center">
-              <Switch
-                onClick={this.toggleMode}
-                checked={mode === Mode.Points}
-              />
+              <Switch onClick={this.toggleMode} checked={mode === Mode.Box} />
               {/* <span className="font-semibold">
                   {mode !== Mode.Points ? "Draw points" : "Draw box"}
                 </span> */}
             </div>
-            <Button onClick={this.processImage}>
-              <div className="flex flex-row items-center justify-center">
-                <PlayCircleOutlined />
-                <span className="ml-2">Segment Image</span>
-              </div>
-            </Button>
+            {isSegmented ? (
+              <Button type="primary" onClick={this.transferStyle}>
+                <div className="flex flex-row items-center justify-center">
+                  <PlayCircleOutlined />
+                  <span className="ml-2">Transfer Style</span>
+                </div>
+              </Button>
+            ) : (
+              <Button
+                disabled={isLoading}
+                type="primary"
+                onClick={this.processImage}
+              >
+                <div className="flex flex-row items-center justify-center">
+                  <PlayCircleOutlined />
+                  <span className="ml-2">Segment Image</span>
+                </div>
+              </Button>
+            )}
+
             <Button onClick={this.handleOnClickDelete}>
               <div className="flex flex-row items-center justify-center">
                 <DeleteOutlined />
@@ -407,14 +504,14 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
           />
           {isLoading ? (
             <CircularProgress
-              className="flex justify-center items-center h-[300px]"
+              className="flex justify-center items-center h-[350px]"
               color="secondary"
             />
           ) : (
             <div>
               {!uploadedImage ? (
                 <div>
-                  <div className="flex items-center justify-center h-[300px]">
+                  <div className="flex items-center justify-center h-[350px]">
                     <Empty
                       image={Empty.PRESENTED_IMAGE_SIMPLE}
                       description="No image yet"
@@ -434,7 +531,7 @@ class ImageProcessor extends React.Component<{ image: string | null }, IState> {
                 </div>
               ) : (
                 <div
-                  className="flex justify-center items-center image-display-container"
+                  className="flex image-display-container"
                   onMouseMove={this.handleMouseMove}
                   style={{ position: "relative" }}
                 >
