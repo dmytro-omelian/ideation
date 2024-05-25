@@ -9,7 +9,7 @@ import {
   UndoOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Empty, message } from "antd";
+import { Checkbox, Button, Empty, Tooltip, message } from "antd";
 
 type Point = { x: number; y: number };
 // type Mode = "points" | "box";
@@ -39,6 +39,7 @@ interface IState {
   isSegmented: boolean;
   error: any;
   originalFile: File | null;
+  isBgr: boolean;
 }
 
 type Box = {
@@ -85,6 +86,7 @@ class ImageProcessor extends React.Component<
       isSegmented: false,
       error: null,
       originalFile: null,
+      isBgr: false,
     };
     this.canvasRef = React.createRef<HTMLCanvasElement>();
     this.imageRef = React.createRef<HTMLImageElement>();
@@ -141,6 +143,7 @@ class ImageProcessor extends React.Component<
   handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const fileReader = new FileReader();
+      const file = event.target.files[0];
       fileReader.onload = (e: ProgressEvent<FileReader>) => {
         const imageUrl = e.target?.result as string;
 
@@ -156,9 +159,9 @@ class ImageProcessor extends React.Component<
         };
         img.src = imageUrl;
 
-        this.setState({ uploadedImage: imageUrl });
+        this.setState({ uploadedImage: imageUrl, originalFile: file });
       };
-      fileReader.readAsDataURL(event.target.files[0]);
+      fileReader.readAsDataURL(file);
     }
   };
 
@@ -281,7 +284,7 @@ class ImageProcessor extends React.Component<
     }
   };
 
-  processImage = () => {
+  processImage = async () => {
     const { mode, points, box, uploadedImageWidth, uploadedImageHeight } =
       this.state;
 
@@ -309,7 +312,7 @@ class ImageProcessor extends React.Component<
       }
       formData.append("file", file);
 
-      fetch(url, {
+      await fetch(url, {
         method: "POST",
         body: formData,
       })
@@ -324,7 +327,9 @@ class ImageProcessor extends React.Component<
         })
         .then((blob) => {
           const imageUrl = URL.createObjectURL(blob);
-          this.setState({ uploadedImage: imageUrl, originalFile: file });
+          this.setState({
+            uploadedImage: imageUrl,
+          });
         })
         .catch((error) => console.error("Error:", error))
         .finally(() => {
@@ -336,15 +341,29 @@ class ImageProcessor extends React.Component<
     }
   };
 
-  transferStyle = () => {
-    const { mode, points, box, uploadedImageWidth, uploadedImageHeight } =
-      this.state;
+  transferStyle = async () => {
+    const {
+      mode,
+      points,
+      box,
+      uploadedImageWidth,
+      uploadedImageHeight,
+      isBgr,
+      originalFile,
+    } = this.state;
+
+    const style_file = this.props.getStyleImage();
 
     const imageInput = document.getElementById(
       "image-processor-input"
     ) as HTMLInputElement;
 
-    if (imageInput && imageInput.files && imageInput.files.length > 0) {
+    if (
+      style_file &&
+      imageInput &&
+      imageInput.files &&
+      imageInput.files.length > 0
+    ) {
       this.setState({ isLoading: true });
       const file = imageInput.files[0];
       console.log("Processing image:", file.name);
@@ -363,11 +382,10 @@ class ImageProcessor extends React.Component<
         formData.append("img_height", uploadedImageHeight.toString());
       }
       formData.append("file", file);
-      // formData.append("style_file", style_file);
+      formData.append("style_file", style_file);
+      formData.append("isBgr", isBgr ? "true" : "false");
 
-      console.log("Form Data:", formData);
-
-      fetch(url, {
+      await fetch(url, {
         method: "POST",
         body: formData,
       })
@@ -441,8 +459,12 @@ class ImageProcessor extends React.Component<
     }
   };
 
+  handleCheckboxChange = () => {
+    this.setState({ isBgr: !this.state.isBgr });
+  };
+
   render() {
-    const { uploadedImage, mode, isLoading, isSegmented } = this.state;
+    const { uploadedImage, mode, isLoading, isSegmented, isBgr } = this.state;
 
     return (
       <div className="image-processor-container h-screen">
@@ -459,6 +481,11 @@ class ImageProcessor extends React.Component<
                   {mode !== Mode.Points ? "Draw points" : "Draw box"}
                 </span> */}
             </div>
+            <Tooltip title={<span>Apply style to background</span>}>
+              <Checkbox checked={isBgr} onChange={this.handleCheckboxChange}>
+                Apply Style to Background
+              </Checkbox>
+            </Tooltip>
             {isSegmented ? (
               <Button type="primary" onClick={this.transferStyle}>
                 <div className="flex flex-row items-center justify-center">
@@ -470,7 +497,7 @@ class ImageProcessor extends React.Component<
               <Button
                 disabled={isLoading}
                 type="primary"
-                onClick={this.processImage}
+                onClick={this.transferStyle}
               >
                 <div className="flex flex-row items-center justify-center">
                   <PlayCircleOutlined />

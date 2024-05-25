@@ -5,7 +5,15 @@ import numpy as np
 import torch
 import cv2
 import supervision as sv
-from starlette.responses import JSONResponse
+import torchvision.transforms as transforms
+
+from PIL import Image, ImageFile
+import torch
+import clip
+from fastapi import HTTPException
+from fastapi.responses import JSONResponse
+from typing import List, Union
+from tqdm import tqdm
 
 from style_transfer import run_style_transfer
 import certifi
@@ -53,7 +61,7 @@ def process_image_with_model_and_get_mask(image_path, default_box: Box, predicto
     predictor.set_image(image_rgb)
     print('Predicting')
 
-    scale_factor: float = width / 600 # FIXME receive this parameter from frontend
+    scale_factor: float = 1 # FIXME receive this parameter from frontend
 
     # TODO load file with default box drawn to check if we get the correct box from the file
     box_coords = np.array([
@@ -68,8 +76,8 @@ def process_image_with_model_and_get_mask(image_path, default_box: Box, predicto
         multimask_output=False
     )
     print('Masks Generated')
-    # box_annotator = sv.BoxAnnotator(color=sv.Color.red())
-    # mask_annotator = sv.MaskAnnotator(color=sv.Color.red(), color_lookup=sv.ColorLookup.INDEX)
+    box_annotator = sv.BoxAnnotator(color=sv.Color.red())
+    mask_annotator = sv.MaskAnnotator(color=sv.Color.red(), color_lookup=sv.ColorLookup.INDEX)
 
     detections = sv.Detections(
         xyxy=sv.mask_to_xyxy(masks=masks),
@@ -77,12 +85,12 @@ def process_image_with_model_and_get_mask(image_path, default_box: Box, predicto
     )
     detections = detections[detections.area == np.max(detections.area)]
 
-    # source_image = box_annotator.annotate(scene=image_bgr.copy(), detections=detections, skip_label=True)
-    # cv2.imwrite(os.path.join(os.getcwd(), "data", "source_image.jpeg"), source_image)
-    #
-    # segmented_image = mask_annotator.annotate(scene=image_bgr.copy(), detections=detections)
-    # output_path = os.path.join(os.getcwd(), "data", "annotated_image.jpeg")
-    # cv2.imwrite(output_path, segmented_image)
+    source_image = box_annotator.annotate(scene=image_bgr.copy(), detections=detections, skip_label=True)
+    cv2.imwrite(os.path.join(os.getcwd(), "data", "source_image.jpeg"), source_image)
+
+    segmented_image = mask_annotator.annotate(scene=image_bgr.copy(), detections=detections)
+    output_path = os.path.join(os.getcwd(), "data", "annotated_image.jpeg")
+    cv2.imwrite(output_path, segmented_image)
 
     mask = detections.mask[0]
     mask = mask.astype(bool)
@@ -104,7 +112,7 @@ def process_image_with_model_and_get_output_path(image_path, default_box: Box, p
     predictor.set_image(image_rgb)
     print('Predicting')
 
-    scale_factor: float = width / 600 # FIXME receive this parameter from frontend
+    scale_factor: float = 1 # FIXME receive this parameter from frontend
 
     # TODO load file with default box drawn to check if we get the correct box from the file
     box_coords = np.array([
@@ -139,16 +147,14 @@ def process_image_with_model_and_get_output_path(image_path, default_box: Box, p
 
 
 cnn = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()
-import torchvision.transforms as transforms
-from PIL import Image
 
-
-def transfer_style(mask, content_img=None, style_img=None, input_img=None):
-
+def transfer_style(mask, content_img_path, style_img_path, isBgr, output_filename="output_image.jpg"):
     cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406])
     cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225])
 
-    imsize = 512 if torch.cuda.is_available() else 128  # use small size if no GPU
+    # imsize = 512 # if torch.cuda.is_available() else 128
+
+    imsize = 512
 
     loader = transforms.Compose([
         transforms.Resize(imsize),
@@ -158,13 +164,13 @@ def transfer_style(mask, content_img=None, style_img=None, input_img=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_default_device(device)
 
-    def image_loader(image_name):
-        image = Image.open(image_name)
+    def image_loader(image_path):
+        image = Image.open(image_path)
         image = loader(image).unsqueeze(0)
         return image.to(device, torch.float)
 
-    style_img = image_loader(f"{os.getcwd()}/data/picasso.jpg")
-    content_img = image_loader(f"{os.getcwd()}/data/dog.jpg")
+    style_img = image_loader(style_img_path)
+    content_img = image_loader(content_img_path)
 
     # TODO how not to loose image quality for result (not masked image part)
 
@@ -218,15 +224,25 @@ def transfer_style(mask, content_img=None, style_img=None, input_img=None):
 
     for i in range(mask.shape[0]):
         for j in range(mask.shape[1]):
-            if mask[i, j]:
-                combined_image[i, j] = styled_img_resized[i, j]
+            if not isBgr:
+                if mask[i, j]:
+                    combined_image[i, j] = styled_img_resized[i, j]
+                else:
+                    combined_image[i, j] = content_img_resized[i, j]
             else:
-                combined_image[i, j] = content_img_resized[i, j]
+                if not mask[i, j]:
+                    combined_image[i, j] = styled_img_resized[i, j]
+                else:
+                    combined_image[i, j] = content_img_resized[i, j]
 
     combined_image_bgr = cv2.cvtColor(combined_image, cv2.COLOR_RGB2BGR)
 
-    output_path = os.path.join(os.getcwd(), 'data', 'output_image.jpg')
+    output_dir = os.path.join(os.getcwd(), 'data')
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    output_path = os.path.join(output_dir, output_filename)
     cv2.imwrite(output_path, combined_image_bgr)
+
     return output_path
 
 app = FastAPI()
@@ -265,8 +281,7 @@ async def create_upload_file(file: UploadFile = File(...), box: str = Form(...))
     return FileResponse(segmented_image_path)
 
 @app.post("/uploadfile/box")
-async def create_upload_file(file: UploadFile = File(...), box: str = Form(...)):
-    # style_file: UploadFile = File(...)
+async def create_upload_file(file: UploadFile = Union[File(...), None], style_file: UploadFile = Union[File(...), None], box: str = Form(...), isBgr: bool = Form(...)):
     print('File Received. Starting Processing')
     try:
         box: Box = json.loads(box)
@@ -274,29 +289,20 @@ async def create_upload_file(file: UploadFile = File(...), box: str = Form(...))
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON format for points")
 
-    with open(file.filename, "wb") as buffer:
+    content_img_path = os.path.join(os.getcwd(), file.filename)
+    with open(content_img_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # with open(style_file.filename, "wb") as buffer:
-    #     shutil.copyfileobj(style_file.file, buffer)
+    style_img_path = os.path.join(os.getcwd(), style_file.filename)
+    with open(style_img_path, "wb") as buffer:
+        shutil.copyfileobj(style_file.file, buffer)
 
-    mask = process_image_with_model_and_get_mask(file.filename, box, sam_predictor)
+    mask = process_image_with_model_and_get_mask(content_img_path, box, sam_predictor)
 
-    output_path = transfer_style(mask)
+    output_path = transfer_style(mask, content_img_path, style_img_path, isBgr, output_filename="styled_output.jpg")
 
     return FileResponse(output_path)
 
-    # return FileResponse(segmented_image_path)
-
-
-import os
-from PIL import Image, ImageFile
-import torch
-import clip
-from fastapi import HTTPException
-from fastapi.responses import JSONResponse
-from typing import List
-from tqdm import tqdm
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
