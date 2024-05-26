@@ -5,6 +5,7 @@ import Photo from "./Photo.component";
 import GalleryModal from "./GalleryModal";
 import ImageUploaderModal, { ImageSaveDto } from "./ImageUploaderModal";
 import Spinner from "../common/Spinner";
+import { useAuth } from "../auth/authContext";
 
 const { RangePicker } = DatePicker;
 
@@ -12,7 +13,7 @@ export interface PhotoI {
   id: number;
   imageS3Id: string;
   caption: string;
-  tags: string[];
+  tags: string;
   date: Date;
   location: string;
   imageData: { type: string; data: Buffer };
@@ -25,7 +26,7 @@ export default function Gallery() {
   const [photosByDate, setPhotosByDate] = useState<PhotoI[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-
+  const { token } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
 
   const uploadFile = async (file: File) => {
@@ -64,7 +65,12 @@ export default function Gallery() {
 
       const responseData = await axios.post(
         "http://localhost:4000/image",
-        formData
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          },
+        }
       );
 
       console.log(responseData.data);
@@ -77,13 +83,15 @@ export default function Gallery() {
     }
   };
 
-  const onClose = () => {};
-
   useEffect(() => {
     const fetchPhotosForLastMonth = async () => {
       try {
         setIsLoading(true);
-        const responseData = await axios.get("http://localhost:4000/image");
+        const responseData = await axios.get("http://localhost:4000/image", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         console.log(responseData.data);
         setPhotosByDate(responseData.data);
@@ -200,22 +208,28 @@ export default function Gallery() {
               View photos
             </Button>
             <div className="grid grid-cols-2 gap-2 justify-center items-center">
-              {groupedPhotos[date].map((photo, index) => (
-                <div
-                  key={index}
-                  className="flex flex-row justify-center items-center cursor-pointer"
-                >
-                  <Photo key={photo.id} photo={photo.imageS3Id} />
-                  <div className="flex flex-col">
-                    <span>{photo.caption}</span>
-                    <div className="mt-2">
-                      {photo.tags.map((tag, tagIndex) => (
-                        <Tag key={tagIndex}>{tag}</Tag>
-                      ))}
+              {groupedPhotos[date].map((photo, index) => {
+                const tags = photo?.tags?.split(",");
+
+                console.log("here", tags);
+
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-row justify-center items-center cursor-pointer"
+                  >
+                    <Photo key={photo.id} photo={photo.imageS3Id} />
+                    <div className="flex flex-col">
+                      <span>{photo.caption}</span>
+                      <div className="mt-2">
+                        {tags.map((tag, tagIndex) => (
+                          <Tag key={tagIndex}>{tag.trim()}</Tag>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}

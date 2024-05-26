@@ -23,7 +23,7 @@ export class ImageService {
         imageS3Id: imageFile.originalname,
         userId: 1,
         caption: createImageDto.caption,
-        tags: [],
+        tags: createImageDto.tags,
         date: new Date('2024-05-01'),
         location: 'Lviv',
       } as Partial<Image>;

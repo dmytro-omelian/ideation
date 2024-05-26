@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
 import { ImageService } from './image.service';
-import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('image')
 export class ImageController {
@@ -14,6 +25,7 @@ export class ImageController {
     return await this.imageService.create({ file, caption });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.imageService.findAll();

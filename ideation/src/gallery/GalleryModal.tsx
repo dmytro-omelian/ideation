@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, Tag } from "antd";
+import { Modal, Button, Input, Tag, message } from "antd";
+import axios from "axios";
 
 import Photo from "./Photo.component";
 import { PhotoI } from "./Gallery.component";
@@ -11,11 +12,6 @@ interface GalleryModalProps {
   handleCancel: () => void;
 }
 
-// TODO lets open image that was clicked (in modal, let's manipulate somehow by index and id)
-// TODO add button to load memories and and write new (scrolling with bullet points or something like that)
-// TODO think about use cases and something like that (I can tell cool story about that)
-// TODO add to collections (but dont remove or something like that, help to display nice menu)
-
 export default function GalleryModal({
   selectedPhotos,
   isModalVisible,
@@ -23,6 +19,12 @@ export default function GalleryModal({
 }: GalleryModalProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isMemoriesOpened, setIsMemoryOpened] = useState(false);
+  const [caption, setCaption] = useState(
+    selectedPhotos[currentPhotoIndex]?.caption || ""
+  );
+  const [tags, setTags] = useState(
+    selectedPhotos[currentPhotoIndex]?.tags || ""
+  );
 
   const handleNextPhoto = () => {
     setCurrentPhotoIndex(
@@ -37,9 +39,37 @@ export default function GalleryModal({
     );
   };
 
-  function handleOnMemoryClicked() {
+  const handleOnMemoryClicked = () => {
     setIsMemoryOpened(!isMemoriesOpened);
-  }
+  };
+
+  const handleSendToTelegram = async () => {
+    const photo = selectedPhotos[currentPhotoIndex];
+    const formData = new FormData();
+    formData.append("caption", photo.caption);
+    formData.append("tags", photo.tags);
+
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/test?key=${photo.imageS3Id}`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      formData.append("image", response.data);
+
+      await axios.post("http://localhost:4000/telegram/send-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      message.success("Image sent to Telegram successfully!");
+    } catch (error) {
+      console.error("Error sending image to Telegram:", error);
+      message.error("Failed to send image to Telegram.");
+    }
+  };
 
   return (
     <Modal
@@ -49,6 +79,9 @@ export default function GalleryModal({
       footer={[
         <Button key="back" onClick={handleCancel}>
           Close
+        </Button>,
+        <Button key="send" type="primary" onClick={handleSendToTelegram}>
+          Send to Telegram
         </Button>,
       ]}
     >
@@ -68,12 +101,18 @@ export default function GalleryModal({
             <div className="flex flex-col">
               <span>{selectedPhotos[currentPhotoIndex]?.caption}</span>
               <div className="mt-2">
-                {selectedPhotos[currentPhotoIndex]?.tags.map(
-                  (tag, tagIndex) => (
-                    <Tag key={tagIndex}>{tag}</Tag>
-                  )
-                )}
+                {selectedPhotos[currentPhotoIndex]?.tags
+                  .split(",")
+                  .map((tag, tagIndex) => (
+                    <Tag key={tagIndex}>{tag.trim()}</Tag>
+                  ))}
               </div>
+              {/* <Input
+                className="mt-2"
+                placeholder="Add a caption"
+                value={selectedPhotos[currentPhotoIndex]?.caption}
+                onChange={(e) => setCaption(e.target.value)}
+              /> */}
             </div>
             <div className="flex flex-row justify-between mt-2">
               <Button

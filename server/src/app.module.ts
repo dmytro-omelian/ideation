@@ -15,7 +15,9 @@ import { ImageHistoryModule } from './image-history/image-history.module';
 import { CollectionModule } from './collection/collection.module';
 import { ImageModule } from './image/image.module';
 import { AwsS3Module } from './aws-s3/aws-s3.module';
-import { MulterModule } from "@nestjs/platform-express";
+import { MulterModule } from '@nestjs/platform-express';
+import { TelegramModule } from './telegram/telegram.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { MulterModule } from "@nestjs/platform-express";
     CollectionModule,
     ImageHistoryModule,
     AwsS3Module,
+    TelegramModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

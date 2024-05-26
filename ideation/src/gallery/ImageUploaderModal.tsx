@@ -48,13 +48,6 @@ export default function ImageUploaderModal({
     setSelectedDate(dateString);
   };
 
-  const handleTagChange = () => {
-    if (tagInput) {
-      setTags([...tags, tagInput]);
-      setTagInput("");
-    }
-  };
-
   const handleTagRemove = (tag: string) => {
     setTags(tags.filter((t) => t !== tag));
   };
@@ -140,13 +133,11 @@ export default function ImageUploaderModal({
           <DatePicker style={{ width: "100%", marginRight: "1rem" }} />
           <Input
             className="mt-3"
-            placeholder="Enter tags"
+            placeholder="Enter tags (delimited by ,)"
             style={{ width: "100%", marginRight: "1rem" }}
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
-            onPressEnter={handleTagChange}
           />
-          {/* <Button onClick={handleTagChange}>Enter</Button> */}
           <div className="flex flex-wrap ml-2">
             {tags.map((tag, index) => (
               <Tag key={index} closable onClose={() => handleTagRemove(tag)}>

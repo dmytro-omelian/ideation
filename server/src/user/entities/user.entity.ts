@@ -5,6 +5,7 @@ import {
   IsString,
   IsDate,
   IsBoolean,
+  IsOptional,
 } from 'class-validator';
 import { Memory } from 'src/memory/entities/memory.entity';
 import { Image } from 'src/image/entities/image.entity';
@@ -16,13 +17,13 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 50 })
-  @IsNotEmpty()
+  @Column({ length: 50, nullable: true })
+  @IsOptional()
   @IsString()
   firstName: string;
 
-  @Column({ length: 50 })
-  @IsNotEmpty()
+  @Column({ length: 50, nullable: true })
+  @IsOptional()
   @IsString()
   lastName: string;
 
@@ -36,18 +37,18 @@ export class User {
   @IsString()
   password: string;
 
-  @Column({ type: 'date' })
-  @IsNotEmpty()
+  @Column({ type: 'date', nullable: true })
+  @IsOptional()
   @IsDate()
   dateOfBirth: Date;
 
-  @Column({ length: 10 })
-  @IsNotEmpty()
+  @Column({ length: 10, nullable: true })
+  @IsOptional()
   @IsString()
   gender: string;
 
-  @Column({ type: 'text' })
-  @IsNotEmpty()
+  @Column({ type: 'text', nullable: true })
+  @IsOptional()
   @IsString()
   bio: string;
 

@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { StyleImage } from './style-image.entity';
 import { Collection } from 'src/collection/entities/collection.entity';
-import { Optional } from "@nestjs/common";
+import { Optional } from '@nestjs/common';
 
 @Entity()
 export class Image {
@@ -23,7 +23,7 @@ export class Image {
 
   @Column()
   userId: number;
-  
+
   @ManyToOne(() => User, (user) => user.images)
   @JoinTable({ name: 'userId' })
   user: User;
@@ -31,8 +31,8 @@ export class Image {
   @Column({ nullable: true })
   caption: string;
 
-  @Column('simple-array')
-  tags: string[];
+  @Column()
+  tags: string;
 
   @Column({ type: 'date' })
   date: Date;
