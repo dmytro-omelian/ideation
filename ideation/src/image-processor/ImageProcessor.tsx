@@ -63,7 +63,11 @@ interface RequestPointsDto {
 // TODO segment couple of things during the demo
 
 class ImageProcessor extends React.Component<
-  { image: string | null; getStyleImage: () => File | null },
+  {
+    image: string | null;
+    getStyleImage: () => File | null;
+    token: string | null;
+  },
   IState
 > {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -72,6 +76,7 @@ class ImageProcessor extends React.Component<
   constructor(props: {
     image: string | null;
     getStyleImage: () => File | null;
+    token: string | null;
   }) {
     super(props);
     this.state = {
@@ -314,6 +319,9 @@ class ImageProcessor extends React.Component<
 
       await fetch(url, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.props.token}`,
+        },
         body: formData,
       })
         .then((response) => {
@@ -387,6 +395,9 @@ class ImageProcessor extends React.Component<
 
       await fetch(url, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.props.token}`,
+        },
         body: formData,
       })
         .then((response) => {
@@ -475,12 +486,9 @@ class ImageProcessor extends React.Component<
                 <UndoOutlined />
               </div>
             </Button>
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <Switch onClick={this.toggleMode} checked={mode === Mode.Box} />
-              {/* <span className="font-semibold">
-                  {mode !== Mode.Points ? "Draw points" : "Draw box"}
-                </span> */}
-            </div>
+            </div> */}
             <Tooltip title={<span>Apply style to background</span>}>
               <Checkbox checked={isBgr} onChange={this.handleCheckboxChange}>
                 Apply Style to Background

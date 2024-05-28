@@ -5,6 +5,7 @@ import axios from "axios";
 import Photo from "./Photo.component";
 import { PhotoI } from "./Gallery.component";
 import MemoryView from "./memories/MemoryView";
+import { useAuth } from "../auth/authContext";
 
 interface GalleryModalProps {
   selectedPhotos: PhotoI[];
@@ -25,6 +26,7 @@ export default function GalleryModal({
   const [tags, setTags] = useState(
     selectedPhotos[currentPhotoIndex]?.tags || ""
   );
+  const { token } = useAuth();
 
   const handleNextPhoto = () => {
     setCurrentPhotoIndex(
@@ -53,6 +55,9 @@ export default function GalleryModal({
       const response = await axios.get(
         `http://localhost:4000/test?key=${photo.imageS3Id}`,
         {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           responseType: "blob",
         }
       );
@@ -62,6 +67,7 @@ export default function GalleryModal({
       await axios.post("http://localhost:4000/telegram/send-image", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       });
       message.success("Image sent to Telegram successfully!");

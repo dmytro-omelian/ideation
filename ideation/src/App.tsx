@@ -20,7 +20,14 @@ function App() {
         <Routes>
           <Route path="/" element={<Main />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/lab" element={<ProtectedRoute component={Lab} />} />
+          <Route
+            path="/lab"
+            element={
+              <ProtectedRoute>
+                <Lab />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/gallery"
             element={
@@ -31,14 +38,21 @@ function App() {
           />
           <Route
             path="/account"
-            element={<ProtectedRoute component={Account} />}
+            element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/favourite"
-            element={<ProtectedRoute component={Collection} />}
+            element={
+              <ProtectedRoute>
+                <Collection />
+              </ProtectedRoute>
+            }
           />
         </Routes>
-        {/* <Footer /> */}
       </BrowserRouter>
     </AuthProvider>
   );

@@ -10,8 +10,10 @@ import {
   CloseOutlined,
   MenuOutlined,
   AntDesignOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/authContext";
 
 const { SubMenu } = Menu;
 
@@ -24,6 +26,7 @@ function handleClick(e: any) {
 
 export default function Header() {
   const [showMenu, setShowMenu] = useState(false);
+  const { user: authorizedUser, logout } = useAuth();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -43,6 +46,17 @@ export default function Header() {
     };
   }, []);
 
+  const handleSupportClick = () => {
+    window.location.href =
+      "mailto:omeluan.dima@gmail.com?subject=Support Request";
+  };
+
+  const handleOnLogoutClick = () => {
+    if (authorizedUser) {
+      logout();
+    }
+  };
+
   const menu = (
     <Menu
       id="menu"
@@ -51,50 +65,66 @@ export default function Header() {
       style={{ width: 256 }}
       mode="inline"
     >
-      <Menu.Item key="1" icon={<HomeOutlined />}>
-        <Link to="/">Home</Link>
-      </Menu.Item>
-      <Menu.Item key="2" icon={<PictureOutlined />}>
-        <Link to="/gallery">Gallery</Link>
-      </Menu.Item>
-      <Menu.Item key="3" icon={<ExperimentOutlined />}>
-        <Link to="/lab">Image Lab</Link>
-      </Menu.Item>
-      <Menu.Item key="4" icon={<UserOutlined />}>
-        <Link to="/account">Account</Link>
-      </Menu.Item>
-      <SubMenu
-        key="sub4"
-        title={
-          <span>
-            <span>Collections</span>
-          </span>
-        }
-      >
-        <Menu.Item key="9" icon={<PictureOutlined />}>
-          <Link to="/favourite">Favourite</Link>
+      {authorizedUser ? (
+        <>
+          <Menu.Item key="1" icon={<HomeOutlined />}>
+            <Link to="/">Home</Link>
+          </Menu.Item>
+          <Menu.Item key="2" icon={<PictureOutlined />}>
+            <Link to="/gallery">Gallery</Link>
+          </Menu.Item>
+          <Menu.Item key="3" icon={<ExperimentOutlined />}>
+            <Link to="/lab">Image Lab</Link>
+          </Menu.Item>
+          <Menu.Item key="4" icon={<UserOutlined />}>
+            <Link to="/account">Account</Link>
+          </Menu.Item>
+          <SubMenu
+            key="sub4"
+            title={
+              <span>
+                <span>Collections</span>
+              </span>
+            }
+          >
+            <Menu.Item key="9" icon={<PictureOutlined />}>
+              <Link to="/favourite">Favourite</Link>
+            </Menu.Item>
+            <Menu.Item key="10" disabled icon={<QuestionCircleOutlined />}>
+              <Tooltip title="Coming soon">
+                <span>Collection Builder</span>
+              </Tooltip>
+            </Menu.Item>
+          </SubMenu>
+          <SubMenu
+            key="sub2"
+            title={
+              <span>
+                <span>Settings</span>
+              </span>
+            }
+          >
+            <Menu.Item
+              key="6"
+              icon={<QuestionCircleOutlined />}
+              onClick={handleSupportClick}
+            >
+              Support
+            </Menu.Item>
+            <Menu.Item
+              key="7"
+              icon={<UserOutlined />}
+              onClick={handleOnLogoutClick}
+            >
+              Log out
+            </Menu.Item>
+          </SubMenu>
+        </>
+      ) : (
+        <Menu.Item key="login" icon={<LoginOutlined />}>
+          <Link to="/login">Login</Link>
         </Menu.Item>
-        <Menu.Item key="10" disabled icon={<QuestionCircleOutlined />}>
-          <Tooltip title="Coming soon">
-            <span>Collection Builder</span>
-          </Tooltip>
-        </Menu.Item>
-      </SubMenu>
-      <SubMenu
-        key="sub2"
-        title={
-          <span>
-            <span>Settings</span>
-          </span>
-        }
-      >
-        <Menu.Item key="6" icon={<QuestionCircleOutlined />}>
-          Support
-        </Menu.Item>
-        <Menu.Item key="7" icon={<UserOutlined />}>
-          Log out
-        </Menu.Item>
-      </SubMenu>
+      )}
     </Menu>
   );
 

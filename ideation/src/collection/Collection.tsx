@@ -7,6 +7,7 @@ import Photo from "../gallery/Photo.component";
 import { PhotoI } from "../gallery/Gallery.component";
 import { User } from "../account/Account";
 import GalleryModal from "../gallery/GalleryModal";
+import { useAuth } from "../auth/authContext";
 
 export interface FavouritesMemory {
   id: number;
@@ -20,12 +21,16 @@ export default function Collection() {
   const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<PhotoI | null>(null);
+  const { user: authorizedUser, token } = useAuth();
 
   useEffect(() => {
     const fetchMemories = async () => {
       try {
         const responseData = await axios.get(
-          `http://localhost:4000/memory/favorites?userId=${1}`
+          `http://localhost:4000/memory/favorites?userId=${authorizedUser?.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         setMemories(responseData.data);
       } catch (error) {
@@ -41,9 +46,15 @@ export default function Collection() {
   const removeFromFavorite = async (id: number) => {
     try {
       setIsLoading(true);
-      await axios.patch(`http://localhost:4000/memory/${id}`, {
-        isFavorite: false,
-      });
+      await axios.patch(
+        `http://localhost:4000/memory/${id}`,
+        {
+          isFavorite: false,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setMemories(memories.filter((memory) => memory.id !== id));
       message.success("Removed from favorites!");
     } catch (error) {

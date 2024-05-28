@@ -15,6 +15,7 @@ import { UpdateImageDto } from './dto/update-image.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('image')
 export class ImageController {
   constructor(private readonly imageService: ImageService) {}
@@ -25,7 +26,6 @@ export class ImageController {
     return await this.imageService.create({ file, caption });
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.imageService.findAll();

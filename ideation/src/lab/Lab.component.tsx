@@ -9,6 +9,7 @@ import {
   EditOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
+import { useAuth } from "../auth/authContext";
 
 export interface UploaderModalSubmit {
   uploadedImage: File[];
@@ -21,6 +22,7 @@ export default function Lab() {
     useState<number>(0);
   const [imageToProcess, setImageToProcess] = useState<string | null>(null);
   const [isImageUploaderEnabled, setIsImageUploaderEnabled] = useState(false);
+  const { token } = useAuth();
 
   function handleOnModalSubmit(modalSubmitProps: UploaderModalSubmit) {
     const { uploadedImage, style } = modalSubmitProps;
@@ -58,12 +60,6 @@ export default function Lab() {
           <Button type="default">
             <DeleteOutlined />
           </Button>
-          <Button type="default" className="ml-2">
-            <div className="flex flex-row items-center justify-center">
-              <EditOutlined />
-              <span className="ml-2">Save Draft</span>
-            </div>
-          </Button>
           <Button
             type="primary"
             className="ml-2"
@@ -83,7 +79,11 @@ export default function Lab() {
           setCurrentStyleImageIndex={setCurrentStyleImageIndex}
           handleOnRemoveStyleImage={handleOnRemoveStyleImage}
         />
-        <ImageProcessor image={imageToProcess} getStyleImage={getStyleImage} />
+        <ImageProcessor
+          image={imageToProcess}
+          getStyleImage={getStyleImage}
+          token={token}
+        />
         {isImageUploaderEnabled && (
           <UploaderPopup
             handleOnModalSubmit={handleOnModalSubmit}

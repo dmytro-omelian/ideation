@@ -1,19 +1,26 @@
-import React, { Component } from "react";
-import { Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./authContext";
-import { JSX } from "react/jsx-runtime";
 
 export default function ProtectedRoute({ children }: any) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  console.log("logged in");
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      // Save the current location they were trying to go to when they were redirected
+      navigate("/login", { replace: true, state: { from: location } });
+    }
+  }, [isLoggedIn, loading, navigate, location]);
+
+  if (loading) {
+    // Optionally return a loading indicator here while checking auth status
+    return <div>Loading...</div>;
+  }
 
   if (!isLoggedIn) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they log in, which is a nicer user experience
-    // than dropping them off on the home page.
-    return <Navigate to="/login" replace />;
+    return null;
   }
 
   return children;

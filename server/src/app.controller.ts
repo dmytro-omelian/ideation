@@ -2,15 +2,19 @@ import {
   Controller,
   Get,
   Param,
-  Post, Query,
+  Post,
+  Query,
   Res,
   UploadedFile,
-  UseInterceptors
-} from "@nestjs/common";
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
 import { Response } from 'express';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}

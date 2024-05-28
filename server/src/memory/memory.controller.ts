@@ -1,8 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpException, HttpStatus } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  HttpException,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { MemoryService } from './memory.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('memory')
 export class MemoryController {
   constructor(private readonly memoryService: MemoryService) {}
@@ -13,7 +27,10 @@ export class MemoryController {
   }
 
   @Get()
-  public async findAll(@Query('userId') userId: number, @Query('imageId') imageId: number) {
+  public async findAll(
+    @Query('userId') userId: number,
+    @Query('imageId') imageId: number,
+  ) {
     // If you need to handle userId and imageId in your service, you can pass them as arguments
     return this.memoryService.findAll(userId, imageId);
   }
@@ -30,7 +47,10 @@ export class MemoryController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateMemoryDto: UpdateMemoryDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateMemoryDto: UpdateMemoryDto,
+  ) {
     return this.memoryService.update(+id, updateMemoryDto);
   }
 

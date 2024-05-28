@@ -4,12 +4,21 @@ import {
   Body,
   HttpException,
   HttpStatus,
+  UseGuards,
+  Get,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Request } from 'express';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { UserService } from '../user/user.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post('login')
   async login(
@@ -36,5 +45,13 @@ export class AuthController {
       throw new HttpException('Username already taken', HttpStatus.BAD_REQUEST);
     }
     return this.authService.register(registerDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getProfile(@Req() req) {
+    // Assuming the JWT Strategy adds the user details to the request object
+    // Here you can also fetch more detailed user information if needed
+    return await this.userService.findOne(req.user.id);
   }
 }

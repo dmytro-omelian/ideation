@@ -12,6 +12,7 @@ interface AuthState {
   isLoggedIn: boolean;
   user: User | null;
   token: string | null;
+  loading: boolean;
 }
 
 interface AuthContextType extends AuthState {
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isLoggedIn: false,
     user: null,
     token: null,
+    loading: true,
   });
 
   const login = async (email: string, password: string): Promise<void> => {
@@ -41,13 +43,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       const data = await response.json();
       const { access_token, user } = data;
+      console.log("User: ", user);
 
-      if (access_token == null) {
-        throw Error("Password is wrong!");
+      if (!access_token) {
+        throw new Error("Invalid credentials");
       }
 
       localStorage.setItem("token", access_token);
-      setAuth({ isLoggedIn: true, user, token: access_token });
+      setAuth({ isLoggedIn: true, user, token: access_token, loading: false });
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -56,15 +59,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = () => {
     localStorage.removeItem("token");
-    setAuth({ isLoggedIn: false, user: null, token: null });
+    setAuth({ isLoggedIn: false, user: null, token: null, loading: false });
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      // Optionally verify token and fetch user details
-      setAuth((auth) => ({ ...auth, isLoggedIn: true, token }));
-    }
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        setAuth((prev) => ({ ...prev, loading: true }));
+        try {
+          const response = await axios.get("http://localhost:4000/auth/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setAuth({
+            isLoggedIn: true,
+            user: response.data,
+            token: token,
+            loading: false,
+          });
+        } catch (error) {
+          console.error("Error verifying token:", error);
+          logout();
+        }
+      } else {
+        setAuth((prev) => ({ ...prev, loading: false }));
+      }
+    };
+
+    fetchUser();
   }, []);
 
   return (
@@ -76,6 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
+  console.log(context);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }

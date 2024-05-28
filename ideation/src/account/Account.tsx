@@ -15,6 +15,7 @@ import {
 import { UserOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import Spinner from "../common/Spinner";
+import { useAuth } from "../auth/authContext";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -44,12 +45,22 @@ export interface User {
 export default function Account() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { user: authorizedUser, token } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!authorizedUser) return;
+
       try {
         setIsLoading(true);
-        const responseData = await axios.get("http://localhost:4000/user/1");
+        console.log("here", authorizedUser);
+
+        const responseData = await axios.get(
+          `http://localhost:4000/user/${authorizedUser.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         setUser(responseData.data);
       } catch (error) {
@@ -60,15 +71,26 @@ export default function Account() {
     };
 
     fetchData();
-  }, []);
+  }, [authorizedUser]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!authorizedUser) {
+    return <div>No user data available</div>;
+  }
 
   const onFinish = (values: UserPatchDto) => {
     const updateData = async () => {
       try {
         setIsLoading(true);
         const responseData = await axios.patch(
-          "http://localhost:4000/user/1",
-          values
+          `http://localhost:4000/user/${authorizedUser.id}`,
+          values,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
 
         console.log(responseData.data);

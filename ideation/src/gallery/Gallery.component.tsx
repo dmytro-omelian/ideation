@@ -68,7 +68,7 @@ export default function Gallery() {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -124,37 +124,36 @@ export default function Gallery() {
     setIsModalVisible(false);
   };
 
-  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setUploading(true);
-      const file = event.target.files?.[0];
-      if (!file) return;
-      const formData = new FormData();
-      formData.append("image", file);
+  // const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   try {
+  //     setUploading(true);
+  //     const file = event.target.files?.[0];
+  //     if (!file) return;
+  //     const formData = new FormData();
+  //     formData.append("image", file);
 
-      await axios.post("http://localhost:4000/upload-image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+  //     await axios.post("http://localhost:4000/upload-image", formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //     });
 
-      // Refresh photos after successful upload
-      const responseData = await axios.get("http://localhost:4000/image");
-      setPhotosByDate(responseData.data);
-      message.success("Image uploaded successfully!");
-    } catch (error) {
-      console.error("Error:", error);
-      message.error("Failed to upload image!");
-    } finally {
-      setUploading(false);
-    }
-  };
+  //     // Refresh photos after successful upload
+  //     const responseData = await axios.get("http://localhost:4000/image");
+  //     setPhotosByDate(responseData.data);
+  //     message.success("Image uploaded successfully!");
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     message.error("Failed to upload image!");
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
 
   if (isLoading || photosByDate.length <= 0) {
     return <Spinner />;
   }
 
-  // Group photos by date
   const groupedPhotos: { [key: string]: PhotoI[] } = photosByDate.reduce(
     (acc, photo) => {
       const dateKey = photo.date.toString();
@@ -168,7 +167,6 @@ export default function Gallery() {
     {} as any
   );
 
-  // Sort photos by date
   const sortedDates = Object.keys(groupedPhotos).sort();
 
   return (

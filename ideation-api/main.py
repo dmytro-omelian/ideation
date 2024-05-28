@@ -154,7 +154,7 @@ def transfer_style(mask, content_img_path, style_img_path, isBgr, output_filenam
 
     # imsize = 512 # if torch.cuda.is_available() else 128
 
-    imsize = 512
+    imsize = 256
 
     loader = transforms.Compose([
         transforms.Resize(imsize),
