@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import "./image-processor.css";
-import { CircularProgress, Switch } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import {
   DeleteOutlined,
-  EditOutlined,
   PlayCircleOutlined,
   DownloadOutlined,
   UndoOutlined,
@@ -12,7 +11,6 @@ import {
 import { Checkbox, Button, Empty, Tooltip, message } from "antd";
 
 type Point = { x: number; y: number };
-// type Mode = "points" | "box";
 
 export enum Mode {
   Points = "points",
@@ -33,7 +31,7 @@ interface IState {
   points: Point[];
   boxStart: Point | null;
   boxEnd: Point | null;
-  tempBoxEnd: Point | null; // Temporary end point for dynamic box drawing
+  tempBoxEnd: Point | null;
   box: Box | null;
   isLoading: boolean;
   isSegmented: boolean;
@@ -49,18 +47,6 @@ type Box = {
   height: number;
   label: string;
 };
-
-interface RequestBoxDto {
-  box: Box;
-}
-
-interface RequestPointsDto {
-  points: Point[];
-}
-
-// TODO we unallow Submit right after image was segmented (show message about that)
-// TODO change process image to segment image, submit to process
-// TODO segment couple of things during the demo
 
 class ImageProcessor extends React.Component<
   {
@@ -145,6 +131,21 @@ class ImageProcessor extends React.Component<
     this.state.points.forEach((point) => this.drawPoint(point));
   };
 
+  componentDidMount() {
+    const savedImage = localStorage.getItem("uploadedImage");
+    if (savedImage) {
+      const img = new Image();
+      img.onload = () => {
+        this.setState({
+          uploadedImageWidth: img.width,
+          uploadedImageHeight: img.height,
+          uploadedImage: savedImage,
+        });
+      };
+      img.src = savedImage;
+    }
+  }
+
   handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const fileReader = new FileReader();
@@ -152,9 +153,10 @@ class ImageProcessor extends React.Component<
       fileReader.onload = (e: ProgressEvent<FileReader>) => {
         const imageUrl = e.target?.result as string;
 
+        localStorage.setItem("uploadedImage", imageUrl);
+
         const img = new Image();
         img.onload = () => {
-          // Now img.width and img.height hold the image's dimensions
           console.log("Image width:", img.width, "Image height:", img.height);
 
           this.setState({
@@ -360,6 +362,11 @@ class ImageProcessor extends React.Component<
       originalFile,
     } = this.state;
 
+    if (box == null) {
+      message.error("Please selecte box area");
+      return;
+    }
+
     const style_file = this.props.getStyleImage();
 
     const imageInput = document.getElementById(
@@ -417,7 +424,7 @@ class ImageProcessor extends React.Component<
         })
         .catch((error) => {
           console.error("Error occurred:", error);
-          this.setState({ error: error.message }); // Set state to hold error message
+          this.setState({ error: error.message });
         })
         .finally(() => {
           this.setState({ isLoading: false, isSegmented: true });
@@ -436,6 +443,7 @@ class ImageProcessor extends React.Component<
     const { uploadedImage } = this.state;
 
     if (uploadedImage) {
+      localStorage.removeItem("uploadedImage");
       this.setState({ uploadedImage: null });
       message.success("Image was successfully deleted!");
     } else {
@@ -465,8 +473,8 @@ class ImageProcessor extends React.Component<
     const ctx = this.canvasRef.current?.getContext("2d");
 
     if (ctx) {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear the canvas
-      points.forEach((point) => this.drawPoint(point)); // Redraw all points
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      points.forEach((point) => this.drawPoint(point));
     }
   };
 
@@ -486,33 +494,21 @@ class ImageProcessor extends React.Component<
                 <UndoOutlined />
               </div>
             </Button>
-            {/* <div className="flex items-center">
-              <Switch onClick={this.toggleMode} checked={mode === Mode.Box} />
-            </div> */}
             <Tooltip title={<span>Apply style to background</span>}>
-              <Checkbox checked={isBgr} onChange={this.handleCheckboxChange}>
-                Apply Style to Background
+              <Checkbox
+                className="flex flex-row items-center justify-center"
+                checked={isBgr}
+                onChange={this.handleCheckboxChange}
+              >
+                Background
               </Checkbox>
             </Tooltip>
-            {isSegmented ? (
-              <Button type="primary" onClick={this.transferStyle}>
-                <div className="flex flex-row items-center justify-center">
-                  <PlayCircleOutlined />
-                  <span className="ml-2">Transfer Style</span>
-                </div>
-              </Button>
-            ) : (
-              <Button
-                disabled={isLoading}
-                type="primary"
-                onClick={this.transferStyle}
-              >
-                <div className="flex flex-row items-center justify-center">
-                  <PlayCircleOutlined />
-                  <span className="ml-2">Segment Image</span>
-                </div>
-              </Button>
-            )}
+            <Button type="primary" onClick={this.transferStyle}>
+              <div className="flex flex-row items-center justify-center">
+                <PlayCircleOutlined />
+                <span className="ml-2">Transfer Style</span>
+              </div>
+            </Button>
 
             <Button onClick={this.handleOnClickDelete}>
               <div className="flex flex-row items-center justify-center">

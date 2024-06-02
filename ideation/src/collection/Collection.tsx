@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { Table, Space, Button, Spin, message, Popconfirm, Empty } from "antd";
+import { Table, Space, Button, Spin, message, Empty } from "antd";
 import axios from "axios";
-import Spinner from "../common/Spinner";
 import { DeleteOutlined } from "@ant-design/icons";
-import Photo from "../gallery/Photo.component";
 import { PhotoI } from "../gallery/Gallery.component";
 import { User } from "../account/Account";
 import GalleryModal from "../gallery/GalleryModal";
 import { useAuth } from "../auth/authContext";
+import { getBackendUrl } from "../common/get-backend-url";
 
 export interface FavouritesMemory {
   id: number;
@@ -22,12 +21,15 @@ export default function Collection() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<PhotoI | null>(null);
   const { user: authorizedUser, token } = useAuth();
+  const serverUrl = getBackendUrl();
 
   useEffect(() => {
+    if (!authorizedUser) return;
+
     const fetchMemories = async () => {
       try {
         const responseData = await axios.get(
-          `http://localhost:4000/memory/favorites?userId=${authorizedUser?.id}`,
+          `${serverUrl}/memory/favorites?userId=${authorizedUser?.id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -41,13 +43,17 @@ export default function Collection() {
     };
 
     fetchMemories();
-  }, []);
+  }, [authorizedUser]);
+
+  if (!authorizedUser) {
+    return <div>No user data available</div>;
+  }
 
   const removeFromFavorite = async (id: number) => {
     try {
       setIsLoading(true);
       await axios.patch(
-        `http://localhost:4000/memory/${id}`,
+        `${serverUrl}/memory/${id}`,
         {
           isFavorite: false,
         },

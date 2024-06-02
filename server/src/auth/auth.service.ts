@@ -1,9 +1,7 @@
-// src/auth/auth.service.ts
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
-import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {

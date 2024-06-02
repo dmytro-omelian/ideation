@@ -10,8 +10,6 @@ import {
   JoinTable,
 } from 'typeorm';
 import { StyleImage } from './style-image.entity';
-import { Collection } from 'src/collection/entities/collection.entity';
-import { Optional } from '@nestjs/common';
 
 @Entity()
 export class Image {
@@ -45,8 +43,4 @@ export class Image {
 
   @OneToMany(() => StyleImage, (styleImage) => styleImage.image)
   styleImages: StyleImage[];
-
-  @ManyToMany(() => Collection)
-  @JoinTable()
-  collections: Collection[];
 }

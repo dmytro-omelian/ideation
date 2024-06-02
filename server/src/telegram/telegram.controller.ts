@@ -1,16 +1,12 @@
-// src/telegram/telegram.controller.ts
-
 import {
   Body,
   Controller,
   Post,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { TelegramService } from './telegram.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('telegram')
 export class TelegramController {

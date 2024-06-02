@@ -1,41 +1,17 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  Res,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { AppService } from './app.service';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { AwsS3Service } from './aws-s3/aws-s3.service';
 
-@UseGuards(JwtAuthGuard)
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
-  @Get('hi')
-  sayHi() {
-    return 'hi';
-  }
-
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return this.appService.uploadFile(file);
-  }
+  constructor(private readonly awsS3Service: AwsS3Service) {}
 
   @Get('test')
   async getImage(@Query('key') key: string, @Res() res: Response) {
     try {
-      const s3Url = `https://${this.appService.AWS_S3_BUCKET}.s3.eu-north-1.amazonaws.com/${key}`;
+      const s3Url = `https://${this.awsS3Service.AWS_S3_BUCKET}.s3.eu-north-1.amazonaws.com/${key}`;
       console.log(s3Url);
-      const imageData = await this.appService.getImageFromS3(s3Url);
+      const imageData = await this.awsS3Service.getImageFromS3(s3Url);
 
       res.set({
         'Content-Type': 'image/png',

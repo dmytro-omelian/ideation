@@ -31,19 +31,12 @@ export class MemoryController {
     @Query('userId') userId: number,
     @Query('imageId') imageId: number,
   ) {
-    // If you need to handle userId and imageId in your service, you can pass them as arguments
     return this.memoryService.findAll(userId, imageId);
   }
 
   @Get('favorites')
   public async findFavorites(@Query('userId') userId: number) {
-    // If you need to handle userId and imageId in your service, you can pass them as arguments
     return this.memoryService.findFavorites(userId);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.memoryService.findOne(+id);
   }
 
   @Patch(':id')

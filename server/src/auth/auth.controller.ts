@@ -50,8 +50,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Req() req) {
-    // Assuming the JWT Strategy adds the user details to the request object
-    // Here you can also fetch more detailed user information if needed
     return await this.userService.findOne(req.user.id);
   }
 }

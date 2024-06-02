@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
-import { InjectRepository } from "@nestjs/typeorm";
-import { Memory } from "./entities/memory.entity";
-import { Repository } from "typeorm";
+import { InjectRepository } from '@nestjs/typeorm';
+import { Memory } from './entities/memory.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MemoryService {
-
   constructor(
-    @InjectRepository(Memory) private readonly memoryRepository: Repository<Memory>
-  ) {
-  }
+    @InjectRepository(Memory)
+    private readonly memoryRepository: Repository<Memory>,
+  ) {}
 
   public async create(createMemoryDto: CreateMemoryDto) {
     const memory = await this.memoryRepository.save(createMemoryDto);
@@ -38,13 +37,7 @@ export class MemoryService {
       .andWhere('memory.isFavorite = true')
       .getMany();
 
-
     return memories;
-  }
-
-
-  findOne(id: number) {
-    return `This action returns a #${id} memory`;
   }
 
   async update(id: number, updateMemoryDto: UpdateMemoryDto) {

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import "./image-uploader.css";
-import ImageFrame from "../ImageFrame.component";
 import { Empty } from "antd";
+import ImageFrame from "../common/ImageFrame.component";
 
 interface ImageUploaderProps {
   images: File[];

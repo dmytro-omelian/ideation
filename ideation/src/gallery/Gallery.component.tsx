@@ -6,6 +6,7 @@ import GalleryModal from "./GalleryModal";
 import ImageUploaderModal, { ImageSaveDto } from "./ImageUploaderModal";
 import Spinner from "../common/Spinner";
 import { useAuth } from "../auth/authContext";
+import { getBackendUrl } from "../common/get-backend-url";
 
 const { RangePicker } = DatePicker;
 
@@ -25,9 +26,9 @@ export default function Gallery() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [photosByDate, setPhotosByDate] = useState<PhotoI[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const { token } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
+  const serverUrl = getBackendUrl();
 
   const uploadFile = async (file: File) => {
     return new Promise<{ filename: string; buffer: ArrayBuffer }>(
@@ -63,17 +64,12 @@ export default function Gallery() {
       );
       formData.append("caption", imageSaveDto.caption);
 
-      const responseData = await axios.post(
-        "http://localhost:4000/image",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const responseData = await axios.post(`${serverUrl}/image`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      console.log(responseData.data);
       setPhotosByDate([...photosByDate, responseData.data]);
     } catch (error) {
       console.error("Error:", error);
@@ -87,13 +83,12 @@ export default function Gallery() {
     const fetchPhotosForLastMonth = async () => {
       try {
         setIsLoading(true);
-        const responseData = await axios.get("http://localhost:4000/image", {
+        const responseData = await axios.get(`${serverUrl}/image`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        console.log(responseData.data);
         setPhotosByDate(responseData.data);
       } catch (error) {
         console.error("Error:", error);
@@ -107,10 +102,6 @@ export default function Gallery() {
     message.success("Account information updated successfully!");
   }, []);
 
-  const handleDateChange = (dates: [Date, Date]) => {
-    setSelectedDate(dates);
-  };
-
   const handlePhotoClick = (photos: PhotoI[]) => {
     setSelectedPhotos(photos);
     showModal();
@@ -123,32 +114,6 @@ export default function Gallery() {
   const handleCancel = () => {
     setIsModalVisible(false);
   };
-
-  // const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   try {
-  //     setUploading(true);
-  //     const file = event.target.files?.[0];
-  //     if (!file) return;
-  //     const formData = new FormData();
-  //     formData.append("image", file);
-
-  //     await axios.post("http://localhost:4000/upload-image", formData, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     });
-
-  //     // Refresh photos after successful upload
-  //     const responseData = await axios.get("http://localhost:4000/image");
-  //     setPhotosByDate(responseData.data);
-  //     message.success("Image uploaded successfully!");
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     message.error("Failed to upload image!");
-  //   } finally {
-  //     setUploading(false);
-  //   }
-  // };
 
   if (isLoading || photosByDate.length <= 0) {
     return <Spinner />;
@@ -173,9 +138,6 @@ export default function Gallery() {
     <div className="p-4">
       <div className="flex flex-col mb-4 w-[33%]">
         <div className="mb-2">
-          <RangePicker style={{ width: "100%" }} />
-        </div>
-        <div className="mb-2">
           <Input.Search
             placeholder="Search by tag or text"
             allowClear
@@ -191,6 +153,7 @@ export default function Gallery() {
       </div>
 
       <ImageUploaderModal
+        handleCancel={() => setIsVisible(false)}
         isVisible={isVisible}
         handleImageSave={handleImageSave}
       />
@@ -232,9 +195,6 @@ export default function Gallery() {
           </div>
         ))}
       </div>
-
-      {/* <input type="file" onChange={handleUpload} accept="image/*" />
-      {uploading && <div>Uploading...</div>} */}
 
       <GalleryModal
         selectedPhotos={selectedPhotos}

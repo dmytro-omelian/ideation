@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   Button,
@@ -6,7 +6,6 @@ import {
   Input,
   Form,
   Typography,
-  Space,
   Select,
   DatePicker,
   Upload,
@@ -16,8 +15,9 @@ import { UserOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import Spinner from "../common/Spinner";
 import { useAuth } from "../auth/authContext";
+import { getBackendUrl } from "../common/get-backend-url";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
 interface UserPatchDto {
@@ -46,6 +46,7 @@ export default function Account() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { user: authorizedUser, token } = useAuth();
+  const serverUrl = getBackendUrl();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,7 +57,7 @@ export default function Account() {
         console.log("here", authorizedUser);
 
         const responseData = await axios.get(
-          `http://localhost:4000/user/${authorizedUser.id}`,
+          `${serverUrl}/user/${authorizedUser.id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -86,7 +87,7 @@ export default function Account() {
       try {
         setIsLoading(true);
         const responseData = await axios.patch(
-          `http://localhost:4000/user/${authorizedUser.id}`,
+          `${serverUrl}/user/${authorizedUser.id}`,
           values,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -186,11 +187,7 @@ export default function Account() {
           <Input placeholder="Email" />
         </Form.Item>
 
-        <Form.Item
-          name="dob"
-          label="Date of Birth"
-          // initialValue={user?.dateOfBirth}
-        >
+        <Form.Item name="dob" label="Date of Birth">
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 

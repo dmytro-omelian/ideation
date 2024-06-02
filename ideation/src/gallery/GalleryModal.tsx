@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { Modal, Button, Input, Tag, message } from "antd";
+import React, { useEffect, useState } from "react";
+import { Modal, Button, Tag, message } from "antd";
 import axios from "axios";
 
 import Photo from "./Photo.component";
 import { PhotoI } from "./Gallery.component";
 import MemoryView from "./memories/MemoryView";
 import { useAuth } from "../auth/authContext";
+import Spinner from "../common/Spinner";
+import { getBackendUrl } from "../common/get-backend-url";
 
 interface GalleryModalProps {
   selectedPhotos: PhotoI[];
@@ -18,15 +20,17 @@ export default function GalleryModal({
   isModalVisible,
   handleCancel,
 }: GalleryModalProps) {
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isMemoriesOpened, setIsMemoryOpened] = useState(false);
-  const [caption, setCaption] = useState(
-    selectedPhotos[currentPhotoIndex]?.caption || ""
-  );
-  const [tags, setTags] = useState(
-    selectedPhotos[currentPhotoIndex]?.tags || ""
-  );
-  const { token } = useAuth();
+  const { user: authorizedUser, token } = useAuth();
+  const serverUrl = getBackendUrl();
+
+  useEffect(() => {
+    if (!authorizedUser) return;
+
+    setIsLoading(false);
+  }, [authorizedUser]);
 
   const handleNextPhoto = () => {
     setCurrentPhotoIndex(
@@ -53,7 +57,7 @@ export default function GalleryModal({
 
     try {
       const response = await axios.get(
-        `http://localhost:4000/test?key=${photo.imageS3Id}`,
+        `${serverUrl}/test?key=${photo.imageS3Id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +68,7 @@ export default function GalleryModal({
 
       formData.append("image", response.data);
 
-      await axios.post("http://localhost:4000/telegram/send-image", formData, {
+      await axios.post(`${serverUrl}/telegram/send-image`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
@@ -76,6 +80,10 @@ export default function GalleryModal({
       message.error("Failed to send image to Telegram.");
     }
   };
+
+  if (isLoading || !authorizedUser) {
+    return <Spinner />;
+  }
 
   return (
     <Modal
@@ -94,7 +102,7 @@ export default function GalleryModal({
       <div className="flex flex-col items-center">
         {isMemoriesOpened ? (
           <MemoryView
-            userId={1}
+            userId={authorizedUser.id}
             imageId={selectedPhotos[currentPhotoIndex].id}
             handleIsMemoreOpened={handleOnMemoryClicked}
           />
@@ -113,12 +121,6 @@ export default function GalleryModal({
                     <Tag key={tagIndex}>{tag.trim()}</Tag>
                   ))}
               </div>
-              {/* <Input
-                className="mt-2"
-                placeholder="Add a caption"
-                value={selectedPhotos[currentPhotoIndex]?.caption}
-                onChange={(e) => setCaption(e.target.value)}
-              /> */}
             </div>
             <div className="flex flex-row justify-between mt-2">
               <Button

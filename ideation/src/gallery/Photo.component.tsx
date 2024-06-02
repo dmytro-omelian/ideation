@@ -1,5 +1,6 @@
 import { Image } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { getBackendUrl } from "../common/get-backend-url";
 
 interface PhotoProps {
   key: number;
@@ -11,7 +12,7 @@ export default function Photo({ key, photo }: PhotoProps) {
 
   return (
     <div className="p-10 w-[300px] h-auto">
-      <Image src={`http://localhost:4000/test?key=${photo}`} />
+      <Image src={`${getBackendUrl()}/test?key=${photo}`} />
     </div>
   );
 }

@@ -1,14 +1,14 @@
-// src/telegram/telegram.service.ts
-
 import { Injectable } from '@nestjs/common';
 import * as FormData from 'form-data';
 import axios from 'axios';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class TelegramService {
-  private readonly botToken: string =
-    '7012598580:AAH6EajID3UU48cM78fYCRcBPWcmfzb_crI';
-  private readonly chatId: string = '-4254868441';
+  private readonly botToken: string = process.env.TELEGRAM_BOT_TOKEN;
+  private readonly chatId: string = process.env.TELEGRAM_CHAT_ID;
 
   async sendImage(
     imageBuffer: Buffer,

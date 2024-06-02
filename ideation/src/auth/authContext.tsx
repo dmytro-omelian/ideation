@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import { User } from "../account/Account";
+import { getBackendUrl } from "../common/get-backend-url";
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -33,10 +34,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     token: null,
     loading: true,
   });
+  const serverUrl = getBackendUrl();
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await fetch("http://localhost:4000/auth/login", {
+      const response = await fetch(`${serverUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -68,7 +70,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (token) {
         setAuth((prev) => ({ ...prev, loading: true }));
         try {
-          const response = await axios.get("http://localhost:4000/auth/me", {
+          const response = await axios.get(`${serverUrl}/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setAuth({

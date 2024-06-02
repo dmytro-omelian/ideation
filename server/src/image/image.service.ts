@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateImageDto } from './dto/create-image.dto';
-import { UpdateImageDto } from './dto/update-image.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
@@ -17,7 +16,7 @@ export class ImageService {
   public async create(createImageDto: CreateImageDto) {
     try {
       const { file: imageFile } = createImageDto;
-      const imageStoredToS3 = await this.awsS3Service.uploadFile(imageFile);
+      await this.awsS3Service.uploadFile(imageFile);
 
       const partialImage = {
         imageS3Id: imageFile.originalname,
@@ -28,8 +27,7 @@ export class ImageService {
         location: 'Lviv',
       } as Partial<Image>;
 
-      const image = await this.imageRepository.save(partialImage);
-      return image;
+      return await this.imageRepository.save(partialImage);
     } catch (error) {
       console.error('Error creating image:', error);
       throw error;
@@ -46,17 +44,5 @@ export class ImageService {
     });
 
     return images.slice(0, 10);
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} image`;
-  }
-
-  update(id: number, updateImageDto: UpdateImageDto) {
-    return `This action updates a #${id} image`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} image`;
   }
 }

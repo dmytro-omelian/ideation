@@ -11,10 +11,6 @@ export class UserService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {}
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
   public async findOne(id: number) {
     const user = await this.userRepo.findOne({
       where: { id: id },
@@ -54,10 +50,4 @@ export class UserService {
       throw new Error(`Failed to update user: ${error.message}`);
     }
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
-
-  async findOneById(sub) {}
 }

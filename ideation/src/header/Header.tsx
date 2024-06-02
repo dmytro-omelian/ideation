@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Menu, Dropdown, Tooltip, Typography } from "antd";
+import React, { useEffect, useState } from "react";
+import { Menu, Tooltip, Typography } from "antd";
 import {
   QuestionCircleOutlined,
   HomeOutlined,
   PictureOutlined,
   ExperimentOutlined,
   UserOutlined,
-  SettingOutlined,
   CloseOutlined,
   MenuOutlined,
   AntDesignOutlined,
@@ -20,9 +19,6 @@ const { SubMenu } = Menu;
 function handleClick(e: any) {
   console.log("click", e);
 }
-
-// TODO add collections to menu sidebar (or at least add Favourite collection)
-// TODO image lab: how to understand if background replacement or style transfering?
 
 export default function Header() {
   const [showMenu, setShowMenu] = useState(false);

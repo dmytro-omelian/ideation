@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Spinner from "../../common/Spinner";
 import axios from "axios";
 import { DeleteOutlined, HeartFilled, HeartOutlined } from "@ant-design/icons";
+import { useAuth } from "../../auth/authContext";
+import { getBackendUrl } from "../../common/get-backend-url";
 
 export interface MemoryViewProps {
   userId: number;
@@ -12,7 +14,7 @@ export interface MemoryViewProps {
 
 export interface IMemory {
   isFavorite: boolean;
-  id: number; // TODO delete memories
+  id: number;
   userId: number;
   imageId: number;
   text: string;
@@ -26,13 +28,18 @@ export default function MemoryView({
   const [memory, setMemory] = useState("");
   const [previousMemories, setPreviousMemories] = useState<IMemory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { user: authorizedUser, token } = useAuth();
+  const serverUrl = getBackendUrl();
 
   useEffect(() => {
     const fetchMemories = async (userId: number, imageId: number) => {
       try {
         setIsLoading(true);
         const responseData = await axios.get(
-          `http://localhost:4000/memory?userId=${userId}&imageId=${imageId}`
+          `${serverUrl}/memory?userId=${userId}&imageId=${imageId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
 
         console.log(responseData.data);
@@ -56,11 +63,17 @@ export default function MemoryView({
   const createMemoryLog = async () => {
     try {
       setIsLoading(true);
-      const responseData = await axios.post(`http://localhost:4000/memory`, {
-        userId,
-        imageId,
-        text: memory,
-      });
+      const responseData = await axios.post(
+        `${serverUrl}/memory`,
+        {
+          userId,
+          imageId,
+          text: memory,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       console.log(responseData.data);
       setPreviousMemories([...previousMemories, responseData.data]);
@@ -77,9 +90,9 @@ export default function MemoryView({
   const deleteMemoryLog = async (id: number) => {
     try {
       setIsLoading(true);
-      const responseData = await axios.delete(
-        `http://localhost:4000/memory/${id}`
-      );
+      const responseData = await axios.delete(`${serverUrl}/memory/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       console.log(responseData.data);
       setPreviousMemories(
@@ -103,8 +116,11 @@ export default function MemoryView({
     try {
       setIsLoading(true);
       const responseData = await axios.patch(
-        `http://localhost:4000/memory/${id}`,
-        { isFavorite: !isFavorite }
+        `${serverUrl}/memory/${id}`,
+        { isFavorite: !isFavorite },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       setPreviousMemories(
         previousMemories.map((memory) =>
@@ -126,17 +142,11 @@ export default function MemoryView({
     return <Spinner />;
   }
 
-  // TODO add createdAt log for memory
-
   return (
     <div>
       {previousMemories.length > 0 ? (
         <div>
           {previousMemories.map((memory, index) => {
-            function onDelete(id: number): void {
-              throw new Error("Function not implemented.");
-            }
-
             return (
               <div
                 key={index}
@@ -144,7 +154,6 @@ export default function MemoryView({
               >
                 <div>{memory.text}</div>
                 <div className="flex">
-                  {/* Render favorite/unfavorite icon based on favorite status */}
                   {memory.isFavorite ? (
                     <Button
                       type="link"

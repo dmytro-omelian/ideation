@@ -1,15 +1,11 @@
 import { useState } from "react";
 import ImageProcessor from "../image-processor/ImageProcessor";
 import ImageUploader from "../image-uploading-scroll/ImageUploader";
-import "./lab.css";
 import UploaderPopup from "./uploader/UploaderPopup.component";
-import { Button, Image, message } from "antd";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { Button, message } from "antd";
+import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
 import { useAuth } from "../auth/authContext";
+import "./lab.css";
 
 export interface UploaderModalSubmit {
   uploadedImage: File[];
@@ -29,8 +25,6 @@ export default function Lab() {
 
     if (style === "style") {
       setStyleImages((images) => [...images, ...uploadedImage]);
-    } else if (style === "content") {
-      // setImageToProcess(uploadedImage);
     }
 
     message.success("was here");
@@ -92,11 +86,6 @@ export default function Lab() {
           />
         )}
       </div>
-      {/* <div className="processing-button">
-        <Button type="primary" className="w-[150px] h-10">
-          Submit
-        </Button>
-      </div> */}
     </div>
   );
 }

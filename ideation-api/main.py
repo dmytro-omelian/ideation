@@ -1,36 +1,28 @@
-import json
-import shutil
 import os
-import numpy as np
-import torch
 import cv2
+import json
+import clip
+import torch
+import shutil
+import certifi
+
+import numpy as np
 import supervision as sv
 import torchvision.transforms as transforms
 
-from PIL import Image, ImageFile
-import torch
-import clip
-from fastapi import HTTPException
-from fastapi.responses import JSONResponse
+from entities import Point, Box
 from typing import List, Union
 from tqdm import tqdm
-
-from style_transfer import run_style_transfer
-import certifi
-
-os.environ['SSL_CERT_FILE'] = certifi.where()
-
-from torchvision.models import vgg19, VGG19_Weights
-
-from typing import List
+from PIL import Image, ImageFile
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-
+from torchvision.models import vgg19, VGG19_Weights
+from style_transfer import run_style_transfer
 from mobile_sam import sam_model_registry, SamPredictor
 
-from entities import Point, Box
-
+os.environ['SSL_CERT_FILE'] = certifi.where()
 
 def initialize_model():
     HOME = os.getcwd()
@@ -61,9 +53,8 @@ def process_image_with_model_and_get_mask(image_path, default_box: Box, predicto
     predictor.set_image(image_rgb)
     print('Predicting')
 
-    scale_factor: float = 1 # FIXME receive this parameter from frontend
+    scale_factor: float = 1
 
-    # TODO load file with default box drawn to check if we get the correct box from the file
     box_coords = np.array([
         default_box['x'] * scale_factor,
         default_box['y'] * scale_factor,
@@ -112,9 +103,8 @@ def process_image_with_model_and_get_output_path(image_path, default_box: Box, p
     predictor.set_image(image_rgb)
     print('Predicting')
 
-    scale_factor: float = 1 # FIXME receive this parameter from frontend
+    scale_factor: float = 1
 
-    # TODO load file with default box drawn to check if we get the correct box from the file
     box_coords = np.array([
         default_box['x'] * scale_factor,
         default_box['y'] * scale_factor,
@@ -172,27 +162,21 @@ def transfer_style(mask, content_img_path, style_img_path, isBgr, output_filenam
     style_img = image_loader(style_img_path)
     content_img = image_loader(content_img_path)
 
-    # TODO how not to loose image quality for result (not masked image part)
-
     def crop_to_match(content_img, style_img):
-        _, _, h_c, w_c = content_img.size()  # Get dimensions of content image
-        _, _, h_s, w_s = style_img.size()  # Get dimensions of style image
+        _, _, h_c, w_c = content_img.size()
+        _, _, h_s, w_s = style_img.size()
 
-        # Calculate cropping box (left, upper, right, lower)
         left = (w_s - w_c) // 2
         top = (h_s - h_c) // 2
         right = left + w_c
         bottom = top + h_c
 
-        # Convert style image to PIL Image to use crop function
         style_img_pil = transforms.ToPILImage()(style_img.squeeze(0))
         style_img_cropped = style_img_pil.crop((left, top, right, bottom))
 
-        # Transform back to tensor
         style_img_cropped = transforms.ToTensor()(style_img_cropped).unsqueeze(0)
         return style_img_cropped
 
-    # Crop style image to match the size of content image
     style_img = crop_to_match(content_img, style_img)
 
     assert style_img.size() == content_img.size(), \

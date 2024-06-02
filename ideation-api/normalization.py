@@ -1,8 +1,6 @@
 import torch
 from torch import nn
 
-# create a module to normalize input image so we can easily put it in a
-# ``nn.Sequential``
 class Normalization(nn.Module):
     def __init__(self, mean, std):
         super(Normalization, self).__init__()
@@ -13,5 +11,4 @@ class Normalization(nn.Module):
         self.std = torch.tensor(std).view(-1, 1, 1)
 
     def forward(self, img):
-        # normalize ``img``
         return (img - self.mean) / self.std

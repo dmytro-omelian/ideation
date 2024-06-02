@@ -3,15 +3,14 @@ import {
   DatePicker,
   Input,
   Tag,
-  Upload,
   message,
   Button,
   Modal,
   UploadFile,
   Alert,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
 import Dragger from "antd/es/upload/Dragger";
+import moment from "moment";
 
 export interface ImageSaveDto {
   selectedDate?: string;
@@ -23,6 +22,7 @@ export interface ImageSaveDto {
 interface ImageUploaderModalProps {
   isVisible: boolean;
   handleImageSave: (imageSaveDto: ImageSaveDto) => void;
+  handleCancel: () => void;
 }
 
 interface UploadProps {
@@ -35,17 +35,16 @@ interface UploadProps {
 export default function ImageUploaderModal({
   isVisible,
   handleImageSave,
+  handleCancel,
 }: ImageUploaderModalProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
-  const [uploading, setUploading] = useState<boolean>(false);
   const [image, setImage] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleDateChange = (date: any, dateString: string) => {
-    setSelectedDate(dateString);
+  const handleDateChange = (date: moment.Moment | null) => {
+    setSelectedDate(date ? date.format("YYYY-MM-DD") : null);
   };
 
   const handleTagRemove = (tag: string) => {
@@ -54,44 +53,6 @@ export default function ImageUploaderModal({
 
   const handleCaptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCaption(e.target.value);
-  };
-
-  const [fileList, setFileList] = useState<any>([]);
-  const [mode, setMode] = useState(false);
-
-  const uploadProps: UploadProps = {
-    multiple: mode,
-    fileList,
-    beforeUpload: (file, filesArray) => {
-      let count = 0;
-      let files = filesArray.filter((file) => {
-        const isPNG = file.type === "image/png";
-        !isPNG && count++;
-        return isPNG;
-      });
-
-      if (count > 0) {
-        setFileList([]);
-        message.error(`${count} Files Not Uploaded. Please Upload PNG File/s`);
-        return false;
-      }
-
-      if (mode) {
-        setFileList(files);
-      } else {
-        setFileList((prev: any) => {
-          let newFiles = [...prev];
-          newFiles.push(file);
-          console.log(fileList);
-          return newFiles;
-        });
-      }
-      console.log(fileList);
-      return true;
-    },
-    onRemove: (file) => {
-      setFileList((prev: any[]) => prev.filter((f) => f.uid !== file.uid));
-    },
   };
 
   function handleRequest(request: { file: any }) {
@@ -109,10 +70,12 @@ export default function ImageUploaderModal({
     setSelectedDate(null);
     setTags([]);
     setCaption("");
+    handleCancel();
   }
 
   function handleOnClickSave() {
     const imageSaveDto = {
+      selectedDate,
       tags,
       caption,
       image,
@@ -130,7 +93,11 @@ export default function ImageUploaderModal({
     >
       <div className="p-4">
         <div className="flex flex-col my-2 mb-4">
-          <DatePicker style={{ width: "100%", marginRight: "1rem" }} />
+          <DatePicker
+            style={{ width: "100%", marginBottom: "1rem" }}
+            onChange={handleDateChange}
+            value={selectedDate ? moment(selectedDate, "YYYY-MM-DD") : null}
+          />
           <Input
             className="mt-3"
             placeholder="Enter tags (delimited by ,)"
@@ -155,7 +122,6 @@ export default function ImageUploaderModal({
         <div style={{ display: "flex", flexDirection: "column" }}>
           {image ? (
             <div>
-              {/* <img src={image} /> */}
               <Alert
                 message="Image was successfully uploaded!"
                 type="success"

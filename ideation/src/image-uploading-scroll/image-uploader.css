@@ -96,33 +96,33 @@
 }
 
 .image-preview-container::-webkit-scrollbar {
-  width: 8px; /* Adjust the width as needed */
-  background: transparent; /* Make scrollbar background transparent */
+  width: 8px;
+  background: transparent;
 }
 
 .image-preview-container::-webkit-scrollbar-thumb {
-  background: transparent; /* Make scrollbar thumb transparent */
+  background: transparent;
 }
 
 .image-preview-container:hover::-webkit-scrollbar-thumb,
 .image-preview-container:active::-webkit-scrollbar-thumb {
-  background: #f3e8ff; /* Set to desired scrollbar thumb color */
+  background: #f3e8ff;
 }
 
 .image-preview-container {
-  scrollbar-width: thin; /* 'auto' or 'thin' */
-  scrollbar-color: transparent transparent; /* Set thumb and track to transparent */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
 }
 
 .image-preview-container:hover,
 .image-preview-container:active {
-  scrollbar-color: #f3e8ff transparent; /* Set to desired scrollbar thumb color */
+  scrollbar-color: #f3e8ff transparent;
 }
 
 @media (max-width: 768px) {
   .image-preview {
-    width: 150px; /* Smaller size on small screens */
-    height: 150px; /* Smaller size on small screens */
+    width: 150px;
+    height: 150px;
   }
 }
 
@@ -140,7 +140,6 @@
   margin: 0 10px;
   font-size: 24px;
   color: #333;
-  /* position: absolute; */
   top: 50%;
   transform: translateY(-50%);
 }

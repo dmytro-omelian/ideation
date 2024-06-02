@@ -46,7 +46,7 @@ html {
   background-color: white;
   border: 1px solid #000000;
   border-radius: 15px;
-  padding: 10px 20px; /* Adjust padding as needed */
-  font-size: 16px; /* Adjust font size as needed */
-  cursor: pointer; /* Add pointer cursor to indicate interactivity */
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
 }

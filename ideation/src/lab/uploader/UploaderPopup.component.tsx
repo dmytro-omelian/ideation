@@ -3,6 +3,7 @@ import Dragger from "antd/es/upload/Dragger";
 import { useState } from "react";
 import { UploaderModalSubmit } from "../Lab.component";
 import Photo from "../../gallery/Photo.component";
+import { getBackendUrl } from "../../common/get-backend-url";
 
 const { Option } = Select;
 
@@ -90,7 +91,7 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
   }
 
   async function downloadImage(url: string): Promise<File> {
-    const response = await fetch(`http://localhost:4000/test?key=${url}`);
+    const response = await fetch(`${getBackendUrl()}/test?key=${url}`);
     const blob = await response.blob();
     const filename = url.split("/").pop() || "recommended_image";
     return new File([blob], filename, { type: blob.type });
@@ -140,7 +141,6 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
             onChange={handleChange}
           >
             <Option value="style">Style Image</Option>
-            {/* <Option value="content">Content Image</Option> */}
           </Select>
         </div>
         {selectedStyle === "style" && (
@@ -164,7 +164,6 @@ export default function UploaderPopup(uploaderPopupProps: UploaderPopupProps) {
             {images.map((image, index) => (
               <div key={index} className="slideshow-container">
                 <div className="image-preview-container">
-                  {/* <ImageFrame image={image} /> */}
                   <button
                     onClick={() => handleOnRemoveClick(image)}
                     className="remove-image-button"

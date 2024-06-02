@@ -17,7 +17,6 @@
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
-  /* background-color: #bbcfff; */
   padding: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -39,8 +38,8 @@
 .control-button:hover,
 .image-processor-button:hover,
 .process-image-button:hover {
-  background-color: #ebd7ff; /* Slightly darker on hover */
-  transform: translateY(-2px); /* Slight lift effect */
+  background-color: #ebd7ff;
+  transform: translateY(-2px);
 }
 
 .control-button span,
